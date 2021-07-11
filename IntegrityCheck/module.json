@@ -1,0 +1,12 @@
+{
+	"id": "{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}",
+	"name": "Integrity Check",
+	"type": 3,
+	"vendor": "",
+	"aliases": [],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "IntegrityCheck",
+	"url": "https://github.com/demel42/IPSymconIntegrityCheck/blob/master/README.md"
+}

@@ -1,0 +1,12 @@
+{
+    "id": "{673E38D6-DB64-2834-28EE-26B338A9A5C2}",
+    "name": "Integrity Check",
+    "author": "Ch. Damsky",
+    "url": "https://github.com/demel42/IPSymconIntegrityCheck",
+    "compatibility": {
+        "version": "5.5"
+    },
+    "version": "0.9",
+    "build": 0,
+    "date": 0
+}

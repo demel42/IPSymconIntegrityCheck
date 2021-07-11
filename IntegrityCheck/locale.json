@@ -1,0 +1,20 @@
+{
+	"translations": {
+		"de": {
+			"Instance is disabled": "Instanz ist deaktiviert",
+
+			"Update data every X minutes": "Aktualisiere Daten alle X Minuten",
+			"Minutes": "Minuten",
+
+			"Update data": "Aktualisiere Daten",
+
+			"Last update": "Letzte Aktualisierung",
+
+			"Instance getting created": "Instanz wird erstellt",
+			"Instance is active": "Instanz ist aktiv",
+			"Instance is deleted": "Instanz wird gelöscht",
+			"Instance is inactive": "Instanz ist inaktiv",
+			"Instance is not created": "Instanz wurde nicht erzeugt"
+		}
+	}
+}
