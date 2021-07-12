@@ -3,7 +3,9 @@
 	"name": "Integrity Check",
 	"type": 3,
 	"vendor": "",
-	"aliases": [],
+	"aliases": [
+		"Symcon Integrity-Check"
+	],
 	"parentRequirements": [],
 	"childRequirements": [],
 	"implemented": [],

@@ -80,4 +80,13 @@ trait IntegrityCheckCommonLib
 
         return $txt;
     }
+
+    private function TranslateFormat(string $str, array $vars = null)
+    {
+        $str = $this->Translate($str);
+        if ($vars != null) {
+            $str = strtr($str, $vars);
+        }
+        return $str;
+    }
 }

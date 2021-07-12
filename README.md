@@ -22,8 +22,7 @@ Prüfung der internen Integrität des IP-Symcon-Installation
 
 ## 2. Voraussetzungen
 
- - IP-Symcon ab Version 5.5<br>
-   Version 4.4 mit Branch _ips_4.4_ (nur noch Fehlerkorrekturen)
+ - IP-Symcon ab Version 5.5
 
 ## 3. Installation
 
