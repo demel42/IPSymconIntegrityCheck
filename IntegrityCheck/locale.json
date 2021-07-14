@@ -7,6 +7,10 @@
 			"Minutes": "Minuten",
 
 			"Update data": "Aktualisiere Daten",
+			"Comment in PHP-Code to exclude this line from checking for Object-ID's":
+				"Kommentar im PHP-Code, um diese Zeile von der Prüfung auf Object-ID's auszuschließen",
+			"PHP-Comment": "PHP-Kommentar",
+			"Objects to be ignored": "Zu ignorierende Objekte",
 
 			"Overview": "Übersicht",
 			"Start time": "Startzeitpunkt",
@@ -22,7 +26,7 @@
 			"is faulty": "ist fehlerhaft",
 			"file \"{$incFile}\" is missing": "Datei \"{$incFile}\" fehlt",
 			"script with ID {$id} does not exist": "Script mit ID {$id} ist nicht vorhanden",
-			"file \"{$file}\" is redundant": "Datei \"{$file}\" ist überflüssig",
+			"file \"{$file}\" is unused": "Datei \"{$file}\" ist ungenutzt",
 			"file \"{$file}\" is missing": "Datei \"{$file}\" fehlt",
 			"object with ID {$id} is unknown": "Objekt mit ID {$id} ist unbekannt",
 			"triggering variable {$varID} is unknown": "auslösende Variable {$varID} ist unbekannt",
@@ -33,19 +37,28 @@
 			"user action with ID {$variableAction} is unknown": "Benutzeraktion mit ID {$variableAction} ist unbekannt",
 			"is not yet saved": "ist noch nicht gespeichert",
 
+			"php-script": "PHP-Script",
+
 			"categories": "Kategorien",
 			"objects": "Objekte",
 			"links": "Verknüpfungen",
 			"modules": "Module",
 			"instances": "Instanzen",
 			"scripts": "Scripte",
-			"events": "Ereignsse",
+			"events": "Ereignisse",
 			"variables": "Variablen",
 			"media": "Medien",
 			"timer": "Timer",
 			"threads": "Threads",
 
+			"active": "aktiv",
+			"used": "verwendet",
+
+			"Timestamp": "Zeitpunkt",
 			"no abnormalities": "keine Auffälligkeiten",
+
+			"found {$errorCount} errors, {$warnCount} warnings and {$infoCount} informations":
+				"{$errorCount} Fehler, {$warnCount} Warnungen und {$infoCount} Informationen gefunden",
 
 			"Instance getting created": "Instanz wird erstellt",
 			"Instance is active": "Instanz ist aktiv",
