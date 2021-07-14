@@ -1,7 +1,7 @@
 {
 	"translations": {
 		"de": {
-			"Instance is disabled": "Instanz ist deaktiviert",
+			"Disable instance": "Instanz deaktivieren",
 
 			"Update data every X minutes": "Aktualisiere Daten alle X Minuten",
 			"Minutes": "Minuten",

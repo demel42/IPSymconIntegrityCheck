@@ -97,7 +97,7 @@ class IntegrityCheck extends IPSModule
         $formElements[] = [
             'type'    => 'CheckBox',
             'name'    => 'module_disable',
-            'caption' => 'Instance is disabled'
+            'caption' => 'Disable instance'
         ];
 
         $formElements[] = [
