@@ -311,7 +311,7 @@ class IntegrityCheck extends IPSModule
         $scriptTypes = [SCRIPTTYPE_PHP];
         if (IPS_GetKernelVersion() >= 6) {
             define('SCRIPTTYPE_FLOWCHART', 1);
-            $scriptTypes[] = SCRIPTTYPE_FLOWCHART;
+            // $scriptTypes[] = SCRIPTTYPE_FLOWCHART;
         }
         foreach ($scriptTypes as $scriptType) {
             $fileListIPS = [];
@@ -444,6 +444,9 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 $script = IPS_GetScript($scriptID);
+                if ($script['ScriptType'] != $scriptType) {
+                    continue;
+				}
                 $file = $script['ScriptFile'];
                 if (in_array($file, $fileListSYS)) {
                     continue;
@@ -477,7 +480,7 @@ class IntegrityCheck extends IPSModule
             if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOWCHART) {
                 /*
                     ['actions']['parameters']['SCRIPT']
-                    Script parsen ㄞuf Object-ID's
+                    Script parsen auf Object-ID's
 
                     ['actions']['parameters']['VARIABLE']
                     Variable-ID checken
