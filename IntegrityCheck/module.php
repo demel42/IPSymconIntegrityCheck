@@ -360,12 +360,10 @@ class IntegrityCheck extends IPSModule
                         continue;
                     }
                 }
-                if (IPS_GetKernelVersion() >= 6) {
-                    if ($scriptType == SCRIPTTYPE_FLOWCHART) {
-                        if (preg_match('/^.*\.inc\.json$/', $file)) {
-                            continue;
-                        }
-                    }
+                if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOWCHART) {
+					if (!preg_match('/^.*\.inc\.json$/', $file)) {
+						continue;
+					}
                 }
                 $fileListSYS[] = $file;
             }
