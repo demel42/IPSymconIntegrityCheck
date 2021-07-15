@@ -20,30 +20,30 @@
 
 Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden 
 
-### Objekte
-- ParentID, ChildrenIDs auf Vorhandensein
-### Instanzen
-- InstanceStatus
+#### Objekte
+- _ParentID_, _ChildrenIDs_ auf Vorhandensein
+#### Instanzen
+- _InstanceStatus_
 - Referenzen der Instanze auf Vorhandensein
-### PHP-Scripte:
+#### PHP-Scripte:
 - ob die Dateien vorhanden sind
 - ob überflüssige Scripte vorhanden sind
 - es werden include/include_once/require/require_once-Anweisungen überprüft, ob die referenzierten Datein vorhanden sind
 - es wird versucht, im PHP-Code vorhandene ID's zu erkennen und diese zu überprüfen
-### Ereignisse
-- TriggerVariableID auf Gültigkeit
-- EventConditions.VariableID auf Gültigkeit
-### Variablen
-- VariableProfile, VariableCustomProfile auf Vorhandensein und passenden Variablen-Typ
-- VariableAction, VariableCustomAction auf Gültigkeit
-### Medien
+#### Ereignisse
+- _TriggerVariableID_ auf Gültigkeit
+- _EventConditions.VariableID_ auf Gültigkeit
+#### Variablen
+- _VariableProfile_, _VariableCustomProfile_ auf Vorhandensein und passenden Variablen-Typ
+- _VariableAction_, _VariableCustomAction_ auf Gültigkeit
+#### Medien
 - ob die entsprechenden Dateien vorhanden sind
-- Information, wenn ein Medien.Objekt nur im Cache vorliegt
-### Verknüpfungen
-- TargetID auf Vorhandensein
-### Module
-### Kategorien
-### Timer
+- Information, wenn ein Medien-Objekt nur im Cache vorliegt
+#### Verknüpfungen
+- _TargetID_ auf Vorhandensein
+#### Module
+#### Kategorien
+#### Timer
 - Anzahl der aktiven Timer
 Threads
 - Anzahl der genutzten Threads
