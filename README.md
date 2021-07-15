@@ -45,7 +45,7 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 #### Kategorien
 #### Timer
 - Anzahl der aktiven Timer
-Threads
+#### Threads
 - Anzahl der genutzten Threads
 
 Die Auffälligkeiten werden detailliert ausgegeben und je nach Schwere als _Error_, _Warning_ oder _Information_ gekennzeichnet.
