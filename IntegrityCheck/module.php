@@ -19,6 +19,8 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('update_interval', '60');
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
 
+        $this->RegisterPropertyString('ignore_nums', json_encode([]));
+
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
 
         $this->RegisterPropertyBoolean('save_checkResult', false);
@@ -66,7 +68,6 @@ class IntegrityCheck extends IPSModule
 
         $ignore_objects = $this->ReadPropertyString('ignore_objects');
         $objectList = json_decode($ignore_objects, true);
-        $this->SendDebug(__FUNCTION__, 'objectList=' . print_r($objectList, true), 0);
         if ($ignore_objects != false) {
             foreach ($objectList as $obj) {
                 $oid = $obj['ObjectID'];
@@ -129,7 +130,8 @@ class IntegrityCheck extends IPSModule
             'caption' => 'PHP-Comment'
         ];
 
-        $formElements[] = [
+        $items = [];
+        $items[] = [
             'type'     => 'List',
             'name'     => 'ignore_objects',
             'rowCount' => 5,
@@ -137,7 +139,7 @@ class IntegrityCheck extends IPSModule
             'delete'   => true,
             'columns'  => [
                 [
-                    'caption'  => 'Objects to be ignored',
+                    'caption'  => 'objects',
                     'name'     => 'ObjectID',
                     'width'    => 'auto',
                     'add'      => '',
@@ -147,6 +149,43 @@ class IntegrityCheck extends IPSModule
                     ]
                 ]
             ]
+        ];
+        $items[] = [
+            'type'     => 'List',
+            'name'     => 'ignore_nums',
+            'rowCount' => 5,
+            'add'      => true,
+            'delete'   => true,
+            'columns'  => [
+                [
+                    'caption'  => 'Numbers',
+                    'name'     => 'ID',
+                    'width'    => '100px',
+                    'add'      => '',
+                    'edit'     => [
+                        'type'     => 'ValidationTextBox',
+                        'validate' => '^[0-9]{5}$',
+                    ]
+                ],
+                [
+                    'caption'  => 'Notice',
+                    'name'     => 'notice',
+                    'width'    => '200px',
+                    'add'      => '',
+                    'edit'     => [
+                        'type'    => 'ValidationTextBox',
+                    ]
+                ]
+            ]
+        ];
+
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'to be ignored ...'
+        ];
+        $formElements[] = [
+            'type'    => 'RowLayout',
+            'items'   => $items
         ];
 
         $formElements[] = [
@@ -195,18 +234,32 @@ class IntegrityCheck extends IPSModule
         $no_id_check = $this->ReadPropertyString('no_id_check');
 
         // zu ignorierende Objekt-IDs
-        $ignoreIDs = [];
+        $ignoreObjects = [];
         $ignore_objects = $this->ReadPropertyString('ignore_objects');
         $objectList = json_decode($ignore_objects, true);
-        if ($ignore_objects != false) {
+        if ($objectList != false) {
             foreach ($objectList as $obj) {
                 $oid = $obj['ObjectID'];
                 if ($oid > 0) {
-                    $ignoreIDs[] = $oid;
+                    $ignoreObjects[] = $oid;
                 }
             }
         }
-        $this->SendDebug(__FUNCTION__, 'ignoreIDs=' . print_r($ignoreIDs, true), 0);
+        $this->SendDebug(__FUNCTION__, 'ignoreObjects=' . print_r($ignoreObjects, true), 0);
+
+        // zu ignorierende Zahlen
+        $ignoreNums = [];
+        $ignore_nums = $this->ReadPropertyString('ignore_nums');
+        $numList = json_decode($ignore_nums, true);
+        if ($numList != false) {
+            foreach ($numList as $num) {
+                $id = $num['ID'];
+                if ($id > 0) {
+                    $ignoreNums[] = $id;
+                }
+            }
+        }
+        $this->SendDebug(__FUNCTION__, 'ignoreNums=' . print_r($ignoreNums, true), 0);
 
         $startTime = IPS_GetKernelStartTime();
 
@@ -218,7 +271,7 @@ class IntegrityCheck extends IPSModule
         // Objekte
         $objectList = IPS_GetObjectList();
         foreach ($objectList as $objectID) {
-            if (in_array($objectID, $ignoreIDs)) {
+            if (in_array($objectID, $ignoreObjects)) {
                 continue;
             }
             $object = IPS_GetObject($objectID);
@@ -252,7 +305,7 @@ class IntegrityCheck extends IPSModule
         $instanceList = IPS_GetInstanceList();
         $instanceActive = 0;
         foreach ($instanceList as $instanceID) {
-            if (in_array($instanceID, $ignoreIDs)) {
+            if (in_array($instanceID, $ignoreObjects)) {
                 continue;
             }
             $instance = IPS_GetInstance($instanceID);
@@ -286,7 +339,7 @@ class IntegrityCheck extends IPSModule
 
         // Referenzen der Instanzen
         foreach ($instanceList as $instanceID) {
-            if (in_array($instanceID, $ignoreIDs)) {
+            if (in_array($instanceID, $ignoreObjects)) {
                 continue;
             }
             $refIDs = IPS_GetReferenceList($instanceID);
@@ -335,7 +388,7 @@ class IntegrityCheck extends IPSModule
                 }
                 $scriptTypeCount[$scriptType]++;
                 $fileListIPS[] = $script['ScriptFile'];
-                if (in_array($scriptID, $ignoreIDs)) {
+                if (in_array($scriptID, $ignoreObjects)) {
                     continue;
                 }
                 if ($script['ScriptIsBroken']) {
@@ -361,9 +414,9 @@ class IntegrityCheck extends IPSModule
                     }
                 }
                 if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOWCHART) {
-					if (!preg_match('/^.*\.inc\.json$/', $file)) {
-						continue;
-					}
+                    if (!preg_match('/^.*\.inc\.json$/', $file)) {
+                        continue;
+                    }
                 }
                 $fileListSYS[] = $file;
             }
@@ -378,7 +431,7 @@ class IntegrityCheck extends IPSModule
                         continue;
                     }
                     $scriptID = @IPS_GetScriptIDByFile($file);
-                    if (in_array($scriptID, $ignoreIDs)) {
+                    if (in_array($scriptID, $ignoreObjects)) {
                         continue;
                     }
                     $lines = explode(PHP_EOL, $text);
@@ -440,13 +493,13 @@ class IntegrityCheck extends IPSModule
             // fehlende Scripte
             $scriptError = 0;
             foreach ($scriptList as $scriptID) {
-                if (in_array($scriptID, $ignoreIDs)) {
+                if (in_array($scriptID, $ignoreObjects)) {
                     continue;
                 }
                 $script = IPS_GetScript($scriptID);
                 if ($script['ScriptType'] != $scriptType) {
                     continue;
-				}
+                }
                 $file = $script['ScriptFile'];
                 if (in_array($file, $fileListSYS)) {
                     continue;
@@ -467,12 +520,12 @@ class IntegrityCheck extends IPSModule
                         continue;
                     }
                     $scriptID = @IPS_GetScriptIDByFile($file);
-                    if (in_array($scriptID, $ignoreIDs)) {
+                    if (in_array($scriptID, $ignoreObjects)) {
                         continue;
                     }
-                    $id = $this->parseText4ObjectIDs($file, $text, $objectList);
+                    $id = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
                     if ($id != false) {
-                        $s = $this->TranslateFormat('object with ID {$id} is unknown', ['{$id}' => $id]);
+                        $s = $this->TranslateFormat('a object with ID {$id} doesn\'t exists', ['{$id}' => $id]);
                         $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
                     }
                 }
@@ -497,7 +550,7 @@ class IntegrityCheck extends IPSModule
         $eventList = IPS_GetEventList();
         $eventActive = 0;
         foreach ($eventList as $eventID) {
-            if (in_array($eventID, $ignoreIDs)) {
+            if (in_array($eventID, $ignoreObjects)) {
                 continue;
             }
             $event = IPS_GetEvent($eventID);
@@ -531,7 +584,7 @@ class IntegrityCheck extends IPSModule
         // Variablen
         $variableList = IPS_GetVariableList();
         foreach ($variableList as $variableID) {
-            if (in_array($variableID, $ignoreIDs)) {
+            if (in_array($variableID, $ignoreObjects)) {
                 continue;
             }
             $variable = IPS_GetVariable($variableID);
@@ -587,7 +640,7 @@ class IntegrityCheck extends IPSModule
         $path = IPS_GetKernelDir();
         $mediaList = IPS_GetMediaList();
         foreach ($mediaList as $mediaID) {
-            if (in_array($mediaID, $ignoreIDs)) {
+            if (in_array($mediaID, $ignoreObjects)) {
                 continue;
             }
             $media = IPS_GetMedia($mediaID);
@@ -869,7 +922,7 @@ class IntegrityCheck extends IPSModule
         $lst[$tag] = $entV;
     }
 
-    private function parseText4ObjectIDs($file, $text, $objectList)
+    private function parseText4ObjectIDs($file, $text, $objectList, $ignoreNums)
     {
         $no_id_check = $this->ReadPropertyString('no_id_check');
 
@@ -885,6 +938,9 @@ class IntegrityCheck extends IPSModule
                 $this->SendDebug(__FUNCTION__, 'script/object-id - match#2 id=' . $r[1] . ': file=' . $file . ', line=' . $line, 0);
                 $id = $r[1];
             } else {
+                continue;
+            }
+            if (in_array($id, $ignoreNums)) {
                 continue;
             }
             if (!in_array($id, $objectList)) {

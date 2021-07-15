@@ -95,13 +95,19 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 | Instanz deaktivieren             | boolean | false        | Instanz temporär deaktivieren |
 |                                  |         |              | |
 | PHP-Kommentar                    | string  |              | PHP-Kommentar, um einzelne Zeilen auszunehmen |
-| zu ignorierende Objekte          | table   |              | Liste von Objekten, die nicht geprüft werden sollen |
+| zu ignorierende ...              |         |              | |
+| ... Objekte                      | table   |              | Liste von Objekten, die nicht geprüft werden sollen |
+| ... Zahlen                       | table   |              | Liste von Zahlen, die nicht als Objekt-ID erkannt werden sollen |
 | Ergebnisse der Prüfung speichern | boolean |              | JSON-Struktur mit der ermittelten Werten in Variable _CheckResult_ speichern |
 | Script nach Test ...             | integer |              | Script, das nach dem Testdurchlauf aufgerufen wird |
 |                                  |         |              | |
 | Prüfung durchführen ...          | integer | 60           | Durchführungsintervall, Angabe in Minuten |
 
-- Script nach Test
+- *... Zahlen*
+die hier angegebenen 5-stelligen Zahlen werden bei der Prüfung von Scripten nicht als Objekt-ID's behandelt und geprüft.
+Die Spalte *Notiz* ist nur optional und als Hiweis, wo si h die Zehl befindet bzw die Bedeutung
+
+- *Script nach Test*
 Das Script kann z.B. dazu dienen eine Benachrichtigung auszulösen. Beipiel siehe [docs/mail_on_error.php](docs/mail_on_error.php).
 
 ## 6. Anhang
