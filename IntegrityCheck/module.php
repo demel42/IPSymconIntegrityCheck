@@ -10,24 +10,28 @@ class IntegrityCheck extends IPSModule
     use IntegrityCheckCommonLib;
     use IntegrityCheckLocalLib;
 
-    public static $NUM_DEVICE = 4;
-
     public function Create()
     {
         parent::Create();
 
         $this->RegisterPropertyBoolean('module_disable', false);
 
-        $this->RegisterPropertyInteger('update_interval', '0');
+        $this->RegisterPropertyInteger('update_interval', '60');
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
 
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
+
+        $this->RegisterPropertyBoolean('save_checkResult', false);
+
+        $this->RegisterPropertyInteger('post_script', 0);
 
         $this->RegisterTimer('UpdateData', 0, 'IntegrityCheck_UpdateData(' . $this->InstanceID . ');');
     }
 
     public function ApplyChanges()
     {
+        $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
+
         parent::ApplyChanges();
 
         $vpos = 0;
@@ -38,6 +42,8 @@ class IntegrityCheck extends IPSModule
         $this->MaintainVariable('WarnCount', $this->Translate('Count of warnings'), VARIABLETYPE_INTEGER, '', $vpos++, true);
         $this->MaintainVariable('InfoCount', $this->Translate('Count of informations'), VARIABLETYPE_INTEGER, '', $vpos++, true);
         $this->MaintainVariable('LastUpdate', $this->Translate('Last update'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
+
+        $this->MaintainVariable('CheckResult', $this->Translate('Check result'), VARIABLETYPE_STRING, '', $vpos++, $save_checkResult);
 
         $module_disable = $this->ReadPropertyBoolean('module_disable');
         if ($module_disable) {
@@ -50,7 +56,7 @@ class IntegrityCheck extends IPSModule
         foreach ($refs as $ref) {
             $this->UnregisterReference($ref);
         }
-        $propertyNames = [];
+        $propertyNames = ['post_script'];
         foreach ($propertyNames as $name) {
             $oid = $this->ReadPropertyInteger($name);
             if ($oid > 0) {
@@ -141,6 +147,18 @@ class IntegrityCheck extends IPSModule
                     ]
                 ]
             ]
+        ];
+
+        $formElements[] = [
+            'type'    => 'CheckBox',
+            'name'    => 'save_checkResult',
+            'caption' => 'Save results of the test'
+        ];
+
+        $formElements[] = [
+            'type'         => 'SelectScript',
+            'name'         => 'post_script',
+            'caption'      => 'Script called after test execution'
         ];
 
         return $formElements;
@@ -627,17 +645,32 @@ class IntegrityCheck extends IPSModule
         $threadUsed = 0;
         foreach ($threadList as $t => $i) {
             $thread = IPS_GetScriptThread($i);
-            $this->SendDebug(__FUNCTION__, 'thread=' . print_r($thread, true) . ', t=' . print_r($t, true) . ', i=' . $i, 0);
+            // $this->SendDebug(__FUNCTION__, 'thread=' . print_r($thread, true) . ', t=' . print_r($t, true) . ', i=' . $i, 0);
 
             $ScriptID = $thread['ScriptID'];
             if ($ScriptID != 0) {
                 $threadUsed++;
             }
         }
-        $counterList['threads'] = [
-            'total' => count($threadList),
-            'used'  => $threadUsed,
-        ];
+
+        /*
+        $check_script = $this->ReadPropertyInteger('check_script');
+        if ($check_script > 0) {
+            $checkResult = [
+                'counterList'  => $counterList,
+                'messageList'  => $messageList,
+            ];
+            $ret = IPS_RunScriptWaitEx($check_script, ['InstanceID' => $this->InstanceID, 'CheckResult' => json_encode($checkResult)]);
+            if ($ret) {
+                $jret = json_decode($ret, true);
+                if (isset($jret['counterList'])
+                    $counterList = $jret['counterList'];
+                if (isset($jret['messageList']))
+                    $messageList = $jret['messageList'];
+            }
+            $this->SendDebug(__FUNCTION__, 'call script ' . IPS_GetParent($post_script) . '\\' . IPS_GetName($post_script) . ', ret=' . $ret, 0);
+        }
+         */
 
         $errorCount = 0;
         $warnCount = 0;
@@ -755,6 +788,20 @@ class IntegrityCheck extends IPSModule
 
         $this->SetValue('LastUpdate', $now);
 
+        $checkResult = [
+            'timestamp'    => $now,
+            'counterList'  => $counterList,
+            'messageList'  => $messageList,
+            'errorCount'   => $errorCount,
+            'warnCount'    => $warnCount,
+            'infoCount'    => $infoCount,
+        ];
+
+        $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
+        if ($save_checkResult) {
+            $this->SetValue('CheckResult', json_encode($checkResult));
+        }
+
         if ($errorCount) {
             $s = $this->TranslateFormat('found {$errorCount} errors, {$warnCount} warnings and {$infoCount} informations',
                 [
@@ -763,6 +810,12 @@ class IntegrityCheck extends IPSModule
                     '{$infoCount}'  => $infoCount
                 ]);
             $this->LogMessage($s, KL_WARNING);
+        }
+
+        $post_script = $this->ReadPropertyInteger('post_script');
+        if ($post_script > 0) {
+            $ret = IPS_RunScriptEx($post_script, ['InstanceID' => $this->InstanceID, 'CheckResult' => json_encode($checkResult)]);
+            $this->SendDebug(__FUNCTION__, 'call script ' . IPS_GetParent($post_script) . '\\' . IPS_GetName($post_script) . ', ret=' . $ret, 0);
         }
     }
 

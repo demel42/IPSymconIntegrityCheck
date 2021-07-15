@@ -11,6 +11,9 @@
 				"Kommentar im PHP-Code, um diese Zeile von der Prüfung auf Object-ID's auszuschließen",
 			"PHP-Comment": "PHP-Kommentar",
 			"Objects to be ignored": "Zu ignorierende Objekte",
+			"Save results of the test": "Ergebnisse der Prüfung speichern",
+			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
+			"Script called after test execution": "Script, das nach Testdurchführung aufgerufen wird",
 
 			"Overview": "Übersicht",
 			"Start time": "Startzeitpunkt",
@@ -18,6 +21,7 @@
 			"Count of warnings": "Anzahl der Warnungen",
 			"Count of informations": "Anzahl der Informationen",
 			"Last update": "Letzte Aktualisierung",
+			"Check result": "Ergebnisse der Prüfung",
 
 			"parent object with ID {$parentID} is unknown": "übergeordnetes Objekt mit ID {$parentID} ist unbekannt",
 			"child object with ID {$childrenID} is unknown": "untergeordnetes Objekt mit ID {$childrenID} ist unbekannt",
