@@ -277,14 +277,14 @@ class IntegrityCheck extends IPSModule
             $object = IPS_GetObject($objectID);
             $parentID = $object['ParentID'];
             if ($parentID != 0 && IPS_ObjectExists($parentID) == false) {
-                $s = $this->TranslateFormat('parent object with ID {$parentID} is unknown', ['{$parentID}' => $parentID]);
+                $s = $this->TranslateFormat('parent object with ID {$parentID} doesn\'t exists', ['{$parentID}' => $parentID]);
                 $this->AddMessageEntry($messageList, 'objects', $objectID, $s, self::$LEVEL_ERROR);
             }
             $childrenIDs = $object['ChildrenIDs'];
             $badIDs = [];
             foreach ($childrenIDs as $childrenID) {
                 if (IPS_ObjectExists($childrenID) == false) {
-                    $s = $this->TranslateFormat('child object with ID {$childrenID} is unknown', ['{$childrenID}' => $childrenID]);
+                    $s = $this->TranslateFormat('child object with ID {$childrenID} doesn\'t exists', ['{$childrenID}' => $childrenID]);
                     $this->AddMessageEntry($messageList, 'objects', $objectID, $s, self::$LEVEL_ERROR);
                 }
             }
@@ -346,7 +346,7 @@ class IntegrityCheck extends IPSModule
             if ($refIDs != false) {
                 foreach ($refIDs as $refID) {
                     if (IPS_ObjectExists($refID) == false) {
-                        $s = $this->TranslateFormat('referenced object with ID {$refID} is unknown', ['{$refID}' => $refID]);
+                        $s = $this->TranslateFormat('referenced object with ID {$refID} doesn\'t exists', ['{$refID}' => $refID]);
                         $this->AddMessageEntry($messageList, 'instances', $instanceID, $s, self::$LEVEL_ERROR);
                     }
                 }
@@ -465,7 +465,7 @@ class IntegrityCheck extends IPSModule
                             $id = $x[1];
                             $incFile = @IPS_GetScriptFile($id);
                             if ($incFile == false) {
-                                $s = $this->TranslateFormat($scriptTypeName . ' with ID {$id} does not exist', ['{$id}' => $id]);
+                                $s = $this->TranslateFormat($scriptTypeName . ' with ID {$id} doesn\'t exists', ['{$id}' => $id]);
                                 $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
                             } else {
                                 if (!in_array($incFile, $fileListINC)) {
@@ -523,10 +523,14 @@ class IntegrityCheck extends IPSModule
                     if (in_array($scriptID, $ignoreObjects)) {
                         continue;
                     }
-                    $id = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
-                    if ($id != false) {
-                        $s = $this->TranslateFormat('a object with ID {$id} doesn\'t exists', ['{$id}' => $id]);
-                        $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                    $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+                    foreach ($ret as $r) {
+                        $id = $r['id'];
+                        $row = $r['row'];
+                        if ($id != false) {
+                            $s = $this->TranslateFormat('row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                            $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                        }
                     }
                 }
             }
@@ -561,7 +565,7 @@ class IntegrityCheck extends IPSModule
             $err = 0;
             $varID = $event['TriggerVariableID'];
             if ($varID != 0 && IPS_VariableExists($varID) == false) {
-                $s = $this->TranslateFormat('triggering variable {$varID} is unknown', ['{$varID}' => $varID]);
+                $s = $this->TranslateFormat('triggering variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
                 $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
             }
             $eventConditions = $event['EventConditions'];
@@ -570,7 +574,7 @@ class IntegrityCheck extends IPSModule
                 foreach ($variableRules as $variableRule) {
                     $varID = $variableRule['VariableID'];
                     if ($varID != 0 && IPS_VariableExists($varID) == false) {
-                        $s = $this->TranslateFormat('condition variable {$varID} is unknown', ['{$varID}' => $varID]);
+                        $s = $this->TranslateFormat('condition variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
                         $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                     }
                 }
@@ -595,7 +599,7 @@ class IntegrityCheck extends IPSModule
             if ($variableProfile != false) {
                 $profile = @IPS_GetVariableProfile($variableProfile);
                 if ($profile == false) {
-                    $s = $this->TranslateFormat('default profile "{$variableProfile}" is unknown', ['{$variableProfile}' => $variableProfile]);
+                    $s = $this->TranslateFormat('default profile "{$variableProfile}" doesn\'t exists', ['{$variableProfile}' => $variableProfile]);
                     $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
                 } else {
                     $profileType = $profile['ProfileType'];
@@ -609,7 +613,7 @@ class IntegrityCheck extends IPSModule
             if ($variableCustomProfile != false) {
                 $profile = @IPS_GetVariableProfile($variableCustomProfile);
                 if ($profile == false) {
-                    $s = $this->TranslateFormat('user profile "{$variableCustomProfile}" is unknown', ['{$variableCustomProfile}' => $variableCustomProfile]);
+                    $s = $this->TranslateFormat('user profile "{$variableCustomProfile}" doesn\'t exists', ['{$variableCustomProfile}' => $variableCustomProfile]);
                     $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
                 } else {
                     $profileType = $profile['ProfileType'];
@@ -623,12 +627,12 @@ class IntegrityCheck extends IPSModule
             // Variableaktionen
             $variableAction = $variable['VariableAction'];
             if ($variableAction > 0 && IPS_InstanceExists($variableAction) == false) {
-                $s = $this->TranslateFormat('default action with ID {$variableAction} is unknown', ['{$variableAction}' => $variableAction]);
+                $s = $this->TranslateFormat('default action with ID {$variableAction} doesn\'t exists', ['{$variableAction}' => $variableAction]);
                 $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
             }
             $variableCustomAction = $variable['VariableCustomAction'];
             if ($variableCustomAction > 1 && IPS_ScriptExists($variableCustomAction) == false) {
-                $s = $this->TranslateFormat('user action with ID {$variableAction} is unknown', ['{$variableCustomAction}' => $variableCustomAction]);
+                $s = $this->TranslateFormat('user action with ID {$variableAction} doesn\'t exists', ['{$variableCustomAction}' => $variableCustomAction]);
                 $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
             }
         }
@@ -675,7 +679,7 @@ class IntegrityCheck extends IPSModule
             $link = IPS_GetLink($linkID);
             $targetID = $link['TargetID'];
             if (!IPS_ObjectExists($targetID)) {
-                $s = $this->TranslateFormat('target object with ID {$targetID} is unknown', ['{$targetID}' => $targetID]);
+                $s = $this->TranslateFormat('target object with ID {$targetID} doesn\'t exists', ['{$targetID}' => $targetID]);
                 $this->AddMessageEntry($messageList, 'links', $linkID, $s, self::$LEVEL_ERROR);
             }
         }
@@ -910,6 +914,23 @@ class IntegrityCheck extends IPSModule
         }
     }
 
+    private function cmp_messages($a, $b)
+    {
+        $a_id = $a['ID'];
+        $b_id = $b['ID'];
+        if ($a_id != $b_id) {
+            return ($a_id < $b_id) ? -1 : 1;
+        }
+        $a_level = $a['Level'];
+        $b_level = $b['Level'];
+        if ($a_level != $b_level) {
+            return ($a_level > $b_level) ? -1 : 1;
+        }
+        $a_msg = $a['Msg'];
+        $b_msg = $b['Msg'];
+        return (strcmp($a_msg, $b_msg) < 0) ? -1 : 1;
+    }
+
     public function AddMessageEntry(array &$lst, string $tag, int $id, string $msg, int $level)
     {
         $this->SendDebug(__FUNCTION__, 'tag=' . $tag . ', id=' . $id . ', msg=' . $msg . ', level=' . $level, 0);
@@ -919,6 +940,7 @@ class IntegrityCheck extends IPSModule
             'Msg'   => $msg,
             'Level' => $level,
         ];
+        usort($entV, ['IntegrityCheck', 'cmp_messages']);
         $lst[$tag] = $entV;
     }
 
@@ -926,8 +948,11 @@ class IntegrityCheck extends IPSModule
     {
         $no_id_check = $this->ReadPropertyString('no_id_check');
 
+        $ret = [];
         $lines = explode(PHP_EOL, $text);
+        $row = 0;
         foreach ($lines as $line) {
+            $row++;
             if (preg_match('/' . preg_quote($no_id_check, '/') . '/', $line)) {
                 continue;
             }
@@ -944,9 +969,12 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             if (!in_array($id, $objectList)) {
-                return $id;
+                $ret[] = [
+                    'id' => $id,
+                    'row'=> $row,
+                ];
             }
         }
-        return false;
+        return $ret;
     }
 }
