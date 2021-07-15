@@ -65,7 +65,7 @@ Die Webconsole von IP-Symcon mit `http://\<IP-Symcon IP\>:3777/console/` öffnen
 
 Anschließend oben rechts auf das Symbol für den Modulstore klicken
 
-Im Suchfeld nun *Integrity Check* eingeben, das Modul auswählen und auf Installieren drücken.
+Im Suchfeld nun *Symcon Integrity-Check* eingeben, das Modul auswählen und auf Installieren drücken.
 
 **Installieren über die Modules-Instanz**
 
