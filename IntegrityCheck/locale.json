@@ -3,10 +3,10 @@
 		"de": {
 			"Disable instance": "Instanz deaktivieren",
 
-			"Update data every X minutes": "Aktualisiere Daten alle X Minuten",
+			"Perform check every X minutes": "Überprüfung alle X Minuten durchführen",
 			"Minutes": "Minuten",
 
-			"Update data": "Aktualisiere Daten",
+			"Perform check": "Überprüfung durchführen",
 			"Comment in PHP-Code to exclude this line from checking for Object-ID's":
 				"Kommentar im PHP-Code, um diese Zeile von der Prüfung auf Object-ID's auszuschließen",
 			"PHP-Comment": "PHP-Kommentar",
@@ -36,7 +36,9 @@
 			"triggering variable {$varID} is unknown": "auslösende Variable {$varID} ist unbekannt",
 			"condition variable {$varID} is unknown": "Condition variable {$varID} is unknown",
 			"default profile \"{$variableProfile}\" is unknown": "Standardprofil \"{$variableProfile}\" ist unbekannt",
+			"default profile \"{$variableProfile}\" has wrong type": "Standardprofil \"{$variableProfile}\" hat falschen Typ",
 			"user profile \"{$variableCustomProfile}\" is unknown": "Benutzerprofil \"{$variableCustomProfile}\" ist unbekannt",
+			"user profile \"{$variableCustomProfile}\" has wrong type": "Benutzerprofil \"{$variableCustomProfile}\" hat falschen Typ",
 			"default action with ID {$variableAction} is unknown": "Standardaktion mit ID {$variableAction} ist unbekannt",
 			"user action with ID {$variableAction} is unknown": "Benutzeraktion mit ID {$variableAction} ist unbekannt",
 			"is not yet saved": "ist noch nicht gespeichert",

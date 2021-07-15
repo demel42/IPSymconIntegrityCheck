@@ -25,7 +25,7 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterPropertyInteger('post_script', 0);
 
-        $this->RegisterTimer('UpdateData', 0, 'IntegrityCheck_UpdateData(' . $this->InstanceID . ');');
+        $this->RegisterTimer('PerformCheck', 0, 'IntegrityCheck_PerformCheck(' . $this->InstanceID . ');');
     }
 
     public function ApplyChanges()
@@ -47,7 +47,7 @@ class IntegrityCheck extends IPSModule
 
         $module_disable = $this->ReadPropertyBoolean('module_disable');
         if ($module_disable) {
-            $this->SetTimerInterval('UpdateData', 0);
+            $this->SetTimerInterval('PerformCheck', 0);
             $this->SetStatus(IS_INACTIVE);
             return;
         }
@@ -108,7 +108,7 @@ class IntegrityCheck extends IPSModule
 
         $formElements[] = [
             'type'    => 'Label',
-            'caption' => 'Update data every X minutes'
+            'caption' => 'Perform check every X minutes'
         ];
         $formElements[] = [
             'type'    => 'IntervalBox',
@@ -170,8 +170,8 @@ class IntegrityCheck extends IPSModule
 
         $formActions[] = [
             'type'    => 'Button',
-            'caption' => 'Update data',
-            'onClick' => 'IntegrityCheck_UpdateData($id);'
+            'caption' => 'Perform check',
+            'onClick' => 'IntegrityCheck_PerformCheck($id);'
         ];
 
         return $formActions;
@@ -181,10 +181,10 @@ class IntegrityCheck extends IPSModule
     {
         $min = $this->ReadPropertyInteger('update_interval');
         $msec = $min > 0 ? $min * 1000 * 60 : 0;
-        $this->SetTimerInterval('UpdateData', $msec);
+        $this->SetTimerInterval('PerformCheck', $msec);
     }
 
-    public function UpdateData()
+    public function PerformCheck()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
             $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
@@ -223,14 +223,14 @@ class IntegrityCheck extends IPSModule
             }
             $object = IPS_GetObject($objectID);
             $parentID = $object['ParentID'];
-            if ($parentID != 0 && !IPS_ObjectExists($parentID)) {
+            if ($parentID != 0 && IPS_ObjectExists($parentID) == false) {
                 $s = $this->TranslateFormat('parent object with ID {$parentID} is unknown', ['{$parentID}' => $parentID]);
                 $this->AddMessageEntry($messageList, 'objects', $objectID, $s, self::$LEVEL_ERROR);
             }
             $childrenIDs = $object['ChildrenIDs'];
             $badIDs = [];
             foreach ($childrenIDs as $childrenID) {
-                if (!IPS_ObjectExists($childrenID)) {
+                if (IPS_ObjectExists($childrenID) == false) {
                     $s = $this->TranslateFormat('child object with ID {$childrenID} is unknown', ['{$childrenID}' => $childrenID]);
                     $this->AddMessageEntry($messageList, 'objects', $objectID, $s, self::$LEVEL_ERROR);
                 }
@@ -292,7 +292,7 @@ class IntegrityCheck extends IPSModule
             $refIDs = IPS_GetReferenceList($instanceID);
             if ($refIDs != false) {
                 foreach ($refIDs as $refID) {
-                    if (!IPS_ObjectExists($refID)) {
+                    if (IPS_ObjectExists($refID) == false) {
                         $s = $this->TranslateFormat('referenced object with ID {$refID} is unknown', ['{$refID}' => $refID]);
                         $this->AddMessageEntry($messageList, 'instances', $instanceID, $s, self::$LEVEL_ERROR);
                     }
@@ -339,7 +339,7 @@ class IntegrityCheck extends IPSModule
                 }
                 if ($script['ScriptIsBroken']) {
                     $s = $this->Translate('ist fehlerhaft');
-                    $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $S, self::$LEVEL_ERROR);
+                    $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
             $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS=' . print_r($fileListIPS, true), 0);
@@ -505,7 +505,7 @@ class IntegrityCheck extends IPSModule
             }
             $err = 0;
             $varID = $event['TriggerVariableID'];
-            if ($varID != 0 && IPS_ObjectExists($varID) == false) {
+            if ($varID != 0 && IPS_VariableExists($varID) == false) {
                 $s = $this->TranslateFormat('triggering variable {$varID} is unknown', ['{$varID}' => $varID]);
                 $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
             }
@@ -514,7 +514,7 @@ class IntegrityCheck extends IPSModule
                 $variableRules = $eventCondition['VariableRules'];
                 foreach ($variableRules as $variableRule) {
                     $varID = $variableRule['VariableID'];
-                    if ($varID != 0 && IPS_ObjectExists($varID) == false) {
+                    if ($varID != 0 && IPS_VariableExists($varID) == false) {
                         $s = $this->TranslateFormat('condition variable {$varID} is unknown', ['{$varID}' => $varID]);
                         $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                     }
@@ -535,25 +535,44 @@ class IntegrityCheck extends IPSModule
             $variable = IPS_GetVariable($variableID);
 
             // Variablenprofile
+            $variableType = $variable['VariableType'];
             $variableProfile = $variable['VariableProfile'];
-            if ($variableProfile != false && IPS_GetVariableProfile($variableProfile) == false) {
-                $s = $this->TranslateFormat('default profile "{$variableProfile}" is unknown', ['{$variableProfile}' => $variableProfile]);
-                $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
+            if ($variableProfile != false) {
+                $profile = @IPS_GetVariableProfile($variableProfile);
+                if ($profile == false) {
+                    $s = $this->TranslateFormat('default profile "{$variableProfile}" is unknown', ['{$variableProfile}' => $variableProfile]);
+                    $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
+                } else {
+                    $profileType = $profile['ProfileType'];
+                    if ($variableType != $profileType) {
+                        $s = $this->TranslateFormat('default profile "{$variableProfile}" has wrong type', ['{$variableProfile}' => $variableProfile]);
+                        $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
+                    }
+                }
             }
             $variableCustomProfile = $variable['VariableCustomProfile'];
-            if ($variableCustomProfile != false && IPS_GetVariableProfile($variableCustomProfile) == false) {
-                $s = $this->TranslateFormat('user profile "{$variableCustomProfile}" is unknown', ['{$variableCustomProfile}' => $variableCustomProfile]);
-                $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
+            if ($variableCustomProfile != false) {
+                $profile = @IPS_GetVariableProfile($variableCustomProfile);
+                if ($profile == false) {
+                    $s = $this->TranslateFormat('user profile "{$variableCustomProfile}" is unknown', ['{$variableCustomProfile}' => $variableCustomProfile]);
+                    $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
+                } else {
+                    $profileType = $profile['ProfileType'];
+                    if ($variableType != $profileType) {
+                        $s = $this->TranslateFormat('user profile "{$variableProfile}" has wrong type', ['{$variableProfile}' => $variableProfile]);
+                        $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
+                    }
+                }
             }
 
             // Variableaktionen
             $variableAction = $variable['VariableAction'];
-            if ($variableAction > 0 && !IPS_ObjectExists($variableAction)) {
+            if ($variableAction > 0 && IPS_InstanceExists($variableAction) == false) {
                 $s = $this->TranslateFormat('default action with ID {$variableAction} is unknown', ['{$variableAction}' => $variableAction]);
                 $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
             }
             $variableCustomAction = $variable['VariableCustomAction'];
-            if ($variableCustomAction > 1 && !IPS_ObjectExists($variableCustomAction)) {
+            if ($variableCustomAction > 1 && IPS_ScriptExists($variableCustomAction) == false) {
                 $s = $this->TranslateFormat('user action with ID {$variableAction} is unknown', ['{$variableCustomAction}' => $variableCustomAction]);
                 $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
             }
