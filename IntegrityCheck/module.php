@@ -608,12 +608,6 @@ class IntegrityCheck extends IPSModule
             'total' => count($mediaList)
         ];
 
-        // Module
-        $moduleList = IPS_GetModuleList();
-        $counterList['modules'] = [
-            'total' => count($moduleList)
-        ];
-
         // Kategorien
         $categoryList = IPS_GetCategoryList();
         $counterList['categories'] = [
@@ -632,6 +626,25 @@ class IntegrityCheck extends IPSModule
         }
         $counterList['links'] = [
             'total' => count($linkList)
+        ];
+
+        // Module
+        $moduleList = IPS_GetModuleList();
+        foreach ($moduleList as $guid) {
+            $module = IPS_GetModule($guid);
+            $moduleID = $module['ModuleID'];
+            if (IPS_ModuleExists($moduleID) == false) {
+                $s = $this->TranslateFormat('module {$moduleName}: module "{$moduleID}" is missing', ['{$moduleName}' => $moduleName, '{$moduleID}' => $moduleID]);
+                $this->AddMessageEntry($messageList, 'modules', 0, $s, self::$LEVEL_ERROR);
+            }
+            $libraryID = $module['LibraryID'];
+            if (IPS_LibraryExists($libraryID) == false) {
+                $s = $this->TranslateFormat('module {$moduleName}: library "{$libraryID}" is missing', ['{$moduleName}' => $moduleName, '{$libraryID}' => $libraryID]);
+                $this->AddMessageEntry($messageList, 'modules', 0, $s, self::$LEVEL_ERROR);
+            }
+        }
+        $counterList['modules'] = [
+            'total' => count($moduleList)
         ];
 
         // Timer
@@ -671,6 +684,10 @@ class IntegrityCheck extends IPSModule
                 $threadUsed++;
             }
         }
+        $counterList['threads'] = [
+            'total' => count($threadList),
+            'used'  => $threadUsed
+        ];
 
         /*
         $check_script = $this->ReadPropertyInteger('check_script');

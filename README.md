@@ -41,8 +41,9 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 - Information, wenn ein Medien-Objekt nur im Cache vorliegt
 #### Verknüpfungen
 - _TargetID_ auf Vorhandensein
-#### Module
 #### Kategorien
+#### Module
+- _ModuleID_, _LibraryID_ auf Vorhandensein prüfen
 #### Timer
 - Anzahl der aktiven Timer
 #### Threads
@@ -113,5 +114,5 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 0.9 @ 14.07.2021 15:47 (beta)
+- 1.0 @ 15.07.2021 15:04 (beta)
   - Initiale Version
