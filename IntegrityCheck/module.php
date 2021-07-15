@@ -310,7 +310,8 @@ class IntegrityCheck extends IPSModule
         $scriptTypeCount = [];
         $scriptTypes = [SCRIPTTYPE_PHP];
         if (IPS_GetKernelVersion() >= 6) {
-            $scriptTypes[] = 1 /* SCRIPTTYPE_FLOWCHART ? Ablaufplan */;
+            define('SCRIPTTYPE_FLOWCHART', 1);
+            $scriptTypes[] = SCRIPTTYPE_FLOWCHART;
         }
         foreach ($scriptTypes as $scriptType) {
             $fileListIPS = [];
