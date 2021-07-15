@@ -23,7 +23,7 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 #### Objekte
 - _ParentID_, _ChildrenIDs_ auf Vorhandensein
 #### Instanzen
-- _InstanceStatus_
+- _InstanceStatus_ prüfen
 - Referenzen der Instanze auf Vorhandensein
 #### PHP-Scripte:
 - ob die Dateien vorhanden sind
@@ -48,7 +48,7 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 Threads
 - Anzahl der genutzten Threads
 
-Die Auffälligkeiten werden detailliert ausgegeben.
+Die Auffälligkeiten werden detailliert ausgegeben und je nach Schwere als _Error_, _Warning_ oder _Information_ gekennzeichnet.
 
 ## 2. Voraussetzungen
 

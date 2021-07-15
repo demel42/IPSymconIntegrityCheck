@@ -267,14 +267,14 @@ class IntegrityCheck extends IPSModule
                 $s = $this->TranslateFormat('Status {$instanceStatus}', ['{$instanceStatus}' => $instanceStatus]);
             }
             switch ($instanceStatus) {
-                case 101:
-                case 103:
+                case IS_CREATING:
+                case IS_DELETING:
                     $lvl = self::$LEVEL_WARN;
                     break;
-                case 104:
+                case IS_INACTIVE:
                     $lvl = self::$LEVEL_INFO;
                     break;
-                case 105:
+                case IS_NOTCREATED:
                     $lvl = self::$LEVEL_ERROR;
                     break;
                 default:
