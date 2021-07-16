@@ -25,11 +25,14 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 #### Instanzen
 - _InstanceStatus_ prüfen
 - Referenzen der Instanze auf Vorhandensein
-#### PHP-Scripte:
-- ob die Dateien vorhanden sind
-- ob überflüssige Scripte vorhanden sind
+#### Script:
+- ob die benötigen Dateien vorhanden sind
+- ob überflüssige Dateien vorhanden sind
+##### PHP-Script:
 - es werden include/include_once/require/require_once-Anweisungen überprüft, ob die referenzierten Datein vorhanden sind
 - es wird versucht, im PHP-Code vorhandene ID's zu erkennen und diese zu überprüfen
+##### Ablaufplan:
+- *noch keine Prüfung*
 #### Ereignisse
 - _TriggerVariableID_ auf Gültigkeit
 - _EventConditions.VariableID_ auf Gültigkeit
