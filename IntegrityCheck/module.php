@@ -362,9 +362,11 @@ class IntegrityCheck extends IPSModule
         $scriptList = IPS_GetScriptList();
         $scriptTypeCount = [];
         $scriptTypes = [SCRIPTTYPE_PHP];
+        $scriptTypeNames = ['php-script'];
         if (IPS_GetKernelVersion() >= 6) {
-            define('SCRIPTTYPE_FLOWCHART', 1);
-            // $scriptTypes[] = SCRIPTTYPE_FLOWCHART;
+            define('SCRIPTTYPE_FLOW', 1);
+            $scriptTypes[] = SCRIPTTYPE_FLOW;
+            $scriptTypeNames[] = 'flow-script';
         }
         foreach ($scriptTypes as $scriptType) {
             $fileListIPS = [];
@@ -372,14 +374,7 @@ class IntegrityCheck extends IPSModule
             $fileListINC = [];
 
             $scriptTypeCount[$scriptType] = 0;
-            if ($scriptType == SCRIPTTYPE_PHP) {
-                $scriptTypeTag = 'scripts';
-                $scriptTypeName = 'php-script';
-            }
-            if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOWCHART) {
-                $scriptTypeTag = 'scripts';
-                $scriptTypeName = 'flowchart';
-            }
+            $scriptTypeName = $scriptTypeNames[$scriptType];
 
             foreach ($scriptList as $scriptID) {
                 $script = IPS_GetScript($scriptID);
@@ -393,7 +388,7 @@ class IntegrityCheck extends IPSModule
                 }
                 if ($script['ScriptIsBroken']) {
                     $s = $this->Translate('ist fehlerhaft');
-                    $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                    $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
             $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS=' . print_r($fileListIPS, true), 0);
@@ -413,8 +408,8 @@ class IntegrityCheck extends IPSModule
                         continue;
                     }
                 }
-                if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOWCHART) {
-                    if (!preg_match('/^.*\.inc\.json$/', $file)) {
+                if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOW) {
+                    if (!preg_match('/^.*\.json$/', $file)) {
                         continue;
                     }
                 }
@@ -459,14 +454,14 @@ class IntegrityCheck extends IPSModule
                                 continue;
                             }
                             $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $incFile]);
-                            $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                            $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                         } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
                             $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $line, 0);
                             $id = $x[1];
                             $incFile = @IPS_GetScriptFile($id);
                             if ($incFile == false) {
                                 $s = $this->TranslateFormat($scriptTypeName . ' with ID {$id} doesn\'t exists', ['{$id}' => $id]);
-                                $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                                $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                             } else {
                                 if (!in_array($incFile, $fileListINC)) {
                                     $fileListINC[] = $incFile;
@@ -487,7 +482,7 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), 0, $s, self::$LEVEL_INFO);
+                $this->AddMessageEntry($messageList, $this->Translate('scripts'), 0, $s, self::$LEVEL_INFO);
             }
 
             // fehlende Scripte
@@ -505,7 +500,7 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
             }
 
             if ($scriptType == SCRIPTTYPE_PHP) {
@@ -516,7 +511,7 @@ class IntegrityCheck extends IPSModule
                     }
                     $text = @file_get_contents($path . '/' . $file);
                     if ($text == false) {
-                        $this->SendDebug(__FUNCTION__, 'script/object-id - no content: file=' . $file, 0);
+                        $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-id - no content: file=' . $file, 0);
                         continue;
                     }
                     $scriptID = @IPS_GetScriptIDByFile($file);
@@ -529,19 +524,56 @@ class IntegrityCheck extends IPSModule
                         $row = $r['row'];
                         if ($id != false) {
                             $s = $this->TranslateFormat('row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
-                            $this->AddMessageEntry($messageList, $this->Translate($scriptTypeTag), $scriptID, $s, self::$LEVEL_ERROR);
+                            $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                         }
                     }
                 }
             }
-            if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOWCHART) {
-                /*
-                    ['actions']['parameters']['SCRIPT']
-                    Script parsen auf Object-ID's
 
-                    ['actions']['parameters']['VARIABLE']
-                    Variable-ID checken
-                 */
+            if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOW) {
+                foreach ($fileListSYS as $file) {
+                    if (!in_array($file, $fileListIPS)) {
+                        continue;
+                    }
+                    $text = @file_get_contents($path . '/' . $file);
+                    if ($text == false) {
+                        $this->SendDebug(__FUNCTION__, $scriptTypeName . ' - no content: file=' . $file, 0);
+                        continue;
+                    }
+                    $scriptID = @IPS_GetScriptIDByFile($file);
+                    if (in_array($scriptID, $ignoreObjects)) {
+                        continue;
+                    }
+
+					/*
+                    $jtext = json_decode($text, true);
+                    $this->SendDebug(__FUNCTION__, 'flow-script - text=' . print_r($jtext, true), 0);
+                    foreach ($jtext['actions'] as $action) {
+                        $this->SendDebug(__FUNCTION__, 'flow-script - action=' . print_r($action, true), 0);
+                        if (isset($action['parameters']['SCRIPT'])) {
+                            $text = $action['parameters']['SCRIPT'];
+                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-ids - lines=' . print_r($lines, true), 0);
+                            $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+                            foreach ($ret as $r) {
+                                $id = $r['id'];
+                                $row = $r['row'];
+                                if ($id != false) {
+                                    $s = $this->TranslateFormat('flow/script - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                                    $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                                }
+                            }
+                        }
+                        if (isset($action['parameters']['VARIABLE'])) {
+                            $varID = intval($action['parameters']['VARIABLE']);
+                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-ids - varID=' . $varID, 0);
+                            if ($varID != 0 && IPS_VariableExists($varID) == false) {
+                                $s = $this->TranslateFormat('flow/variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
+                                $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                            }
+                        }
+                    }
+					*/
+                }
             }
         }
 
@@ -821,7 +853,17 @@ class IntegrityCheck extends IPSModule
                     $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
                     break;
                 case 'scripts':
-                    $s = ''; /* Zähler für PHP und Flowchart trennen */
+                    $s = '';
+                    if (IPS_GetKernelVersion() >= 6) {
+                        foreach ($scriptTypes as $scriptType) {
+                            if ($s != '') {
+                                $s .= ', ';
+                            }
+                            $scriptTypeName = $scriptTypeNames[$scriptType];
+                            $s .= $this->Translate($scriptTypeName) . '=' . $counters['types'][$scriptType];
+                        }
+                        $s = ' (' . $s . ')';
+                    }
                     break;
                 case 'events':
                     $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
