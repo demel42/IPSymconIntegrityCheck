@@ -3,17 +3,21 @@
 		"de": {
 			"Disable instance": "Instanz deaktivieren",
 
+			"Basic settings": "Grundeinstellung",
 			"Perform check every X minutes": "Überprüfung alle X Minuten durchführen",
 			"Minutes": "Minuten",
 
 			"Perform check": "Überprüfung durchführen",
-			"Comment in PHP-Code to exclude this line from checking for Object-ID's":
-				"Kommentar im PHP-Code, um diese Zeile von der Prüfung auf Object-ID's auszuschließen",
-			"PHP-Comment": "PHP-Kommentar",
-			"to be ignored ...": "Zu ignorierende ...",
+
+			"Elements to be ignored ...": "zu ignorierende Elemente ...",
 			"Notice": "Notiz",
 			"Numbers": "Zahlen",
-			"Save results of the test": "Ergebnisse der Prüfung speichern",
+
+			"ignore objects below this category": "Objekte unterhalb der Kategorie ignorieren",
+			"don't check PHP-line with this comment": "PHP-Zeile mit diesem Kommentar nicht prüfen",
+
+
+			"Save complete results of the test": "Ergebnisse der Prüfung vollständig speichern",
 			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
 			"Script called after test execution": "Script, das nach Testdurchführung aufgerufen wird",
 

@@ -93,22 +93,27 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 
 ### Variablen
 
-| Eigenschaft                      | Typ     | Standardwert | Beschreibung |
-| :------------------------------- | :------ | :----------- | :----------- |
-| Instanz deaktivieren             | boolean | false        | Instanz temporär deaktivieren |
-|                                  |         |              | |
-| PHP-Kommentar                    | string  |              | PHP-Kommentar, um einzelne Zeilen auszunehmen |
-| zu ignorierende ...              |         |              | |
-| ... Objekte                      | table   |              | Liste von Objekten, die nicht geprüft werden sollen |
-| ... Zahlen                       | table   |              | Liste von Zahlen, die nicht als Objekt-ID erkannt werden sollen |
-| Ergebnisse der Prüfung speichern | boolean |              | JSON-Struktur mit der ermittelten Werten in Variable _CheckResult_ speichern |
-| Script nach Test ...             | integer |              | Script, das nach dem Testdurchlauf aufgerufen wird |
-|                                  |         |              | |
-| Prüfung durchführen ...          | integer | 60           | Durchführungsintervall, Angabe in Minuten |
+| Eigenschaft                                       | Typ     | Standardwert | Beschreibung |
+| :-------------------------------                  | :------ | :----------- | :----------- |
+| Instanz deaktivieren                              | boolean | false        | Instanz temporär deaktivieren |
+|                                                   |         |              | |
+| Ergebnisse der Prüfung speichern                  | boolean |              | JSON-Struktur mit der ermittelten Werten in Variable _CheckResult_ speichern |
+| Script, das nach Testdurchführung aufgerufen wird | integer |              | Script, das nach dem Testdurchlauf aufgerufen wird |
+|                                                   |         |              | |
+| zu ignorierende Elemente                          |         |              | |
+| ... Objekte                                       | table   |              | Liste von Objekten, die nicht geprüft werden sollen |
+| ... Zahlen                                        | table   |              | Liste von Zahlen, die nicht als Objekt-ID erkannt werden sollen |
+| Objekte unterhalb der Kategorie ignorieren        | integer |              | Kategorie für zu ignorierende Objekte |
+| PHP-Kommentar                                     | string  |              | PHP-Kommentar, um einzelne Zeilen auszunehmen |
+|                                                   |         |              | |
+| Prüfung durchführen ...                           | integer | 60           | Durchführungsintervall, Angabe in Minuten |
 
 - *... Zahlen*
 die hier angegebenen 5-stelligen Zahlen werden bei der Prüfung von Scripten nicht als Objekt-ID's behandelt und geprüft.
 Die Spalte *Notiz* ist nur optional und als Hiweis, wo si h die Zehl befindet bzw die Bedeutung
+
+- *Objekte unterhalb der Kategorie*
+alle Objekte unterhalb der angegebenen Kategorie werden ignoriert, dabei werden Verknüpfungen *nicht* gefolgt.
 
 - *Script nach Test*
 Das Script kann z.B. dazu dienen eine Benachrichtigung auszulösen. Beipiel siehe [docs/mail_on_error.php](docs/mail_on_error.php).

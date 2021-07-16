@@ -18,13 +18,10 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterPropertyInteger('update_interval', '60');
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
-
+        $this->RegisterPropertyInteger('ignore_category', 0);
         $this->RegisterPropertyString('ignore_nums', json_encode([]));
-
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
-
         $this->RegisterPropertyBoolean('save_checkResult', false);
-
         $this->RegisterPropertyInteger('post_script', 0);
 
         $this->RegisterTimer('PerformCheck', 0, 'IntegrityCheck_PerformCheck(' . $this->InstanceID . ');');
@@ -58,7 +55,7 @@ class IntegrityCheck extends IPSModule
         foreach ($refs as $ref) {
             $this->UnregisterReference($ref);
         }
-        $propertyNames = ['post_script'];
+        $propertyNames = ['ignore_category', 'post_script'];
         foreach ($propertyNames as $name) {
             $oid = $this->ReadPropertyInteger($name);
             if ($oid > 0) {
@@ -107,97 +104,105 @@ class IntegrityCheck extends IPSModule
             'caption' => 'Disable instance'
         ];
 
-        $formElements[] = [
+        $items = [];
+        $items[] = [
             'type'    => 'Label',
             'caption' => 'Perform check every X minutes'
         ];
-        $formElements[] = [
+        $items[] = [
             'type'    => 'IntervalBox',
             'name'    => 'update_interval',
             'caption' => 'Minutes'
         ];
 
-        $formElements[] = [
-            'type'    => 'Label'
+        $items[] = [
+            'type'    => 'CheckBox',
+            'name'    => 'save_checkResult',
+            'caption' => 'Save complete results of the test'
         ];
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'Comment in PHP-Code to exclude this line from checking for Object-ID\'s'
+
+        $items[] = [
+            'type'         => 'SelectScript',
+            'name'         => 'post_script',
+            'caption'      => 'Script called after test execution'
         ];
+
         $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'no_id_check',
-            'caption' => 'PHP-Comment'
+            'type'    => 'ExpansionPanel',
+            'items'   => $items,
+            'caption' => 'Basic settings'
         ];
 
         $items = [];
         $items[] = [
-            'type'     => 'List',
-            'name'     => 'ignore_objects',
-            'rowCount' => 5,
-            'add'      => true,
-            'delete'   => true,
-            'columns'  => [
+            'type'    => 'RowLayout',
+            'items'   => [
                 [
-                    'caption'  => 'objects',
-                    'name'     => 'ObjectID',
-                    'width'    => 'auto',
-                    'add'      => '',
-                    'edit'     => [
-                        'type'    => 'SelectObject',
-                        'caption' => 'Target'
-                    ]
-                ]
-            ]
-        ];
-        $items[] = [
-            'type'     => 'List',
-            'name'     => 'ignore_nums',
-            'rowCount' => 5,
-            'add'      => true,
-            'delete'   => true,
-            'columns'  => [
-                [
-                    'caption'  => 'Numbers',
-                    'name'     => 'ID',
-                    'width'    => '100px',
-                    'add'      => '',
-                    'edit'     => [
-                        'type'     => 'ValidationTextBox',
-                        'validate' => '^[0-9]{5}$',
+                    'type'     => 'List',
+                    'name'     => 'ignore_objects',
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
+                        [
+                            'caption'  => 'objects',
+                            'name'     => 'ObjectID',
+                            'width'    => 'auto',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'    => 'SelectObject',
+                                'caption' => 'Target'
+                            ]
+                        ]
                     ]
                 ],
                 [
-                    'caption'  => 'Notice',
-                    'name'     => 'notice',
-                    'width'    => '200px',
-                    'add'      => '',
-                    'edit'     => [
-                        'type'    => 'ValidationTextBox',
+                    'type'     => 'List',
+                    'name'     => 'ignore_nums',
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
+                        [
+                            'caption'  => 'Numbers',
+                            'name'     => 'ID',
+                            'width'    => '100px',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'     => 'ValidationTextBox',
+                                'validate' => '^[0-9]{5}$',
+                            ]
+                        ],
+                        [
+                            'caption'  => 'Notice',
+                            'name'     => 'notice',
+                            'width'    => '200px',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'    => 'ValidationTextBox',
+                            ]
+                        ]
                     ]
                 ]
             ]
         ];
 
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'to be ignored ...'
+        $items[] = [
+            'type'    => 'SelectCategory',
+            'name'    => 'ignore_category',
+            'caption' => 'ignore objects below this category'
         ];
-        $formElements[] = [
-            'type'    => 'RowLayout',
-            'items'   => $items
+
+        $items[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'no_id_check',
+            'caption' => 'don\'t check PHP-line with this comment'
         ];
 
         $formElements[] = [
-            'type'    => 'CheckBox',
-            'name'    => 'save_checkResult',
-            'caption' => 'Save results of the test'
-        ];
-
-        $formElements[] = [
-            'type'         => 'SelectScript',
-            'name'         => 'post_script',
-            'caption'      => 'Script called after test execution'
+            'type'    => 'ExpansionPanel',
+            'items'   => $items,
+            'caption' => 'Elements to be ignored ...'
         ];
 
         return $formElements;
@@ -245,6 +250,12 @@ class IntegrityCheck extends IPSModule
                 }
             }
         }
+
+        $ignore_category = $this->ReadPropertyInteger('ignore_category');
+        if ($ignore_category > 0) {
+            $this->GetAllChildenIDs($ignore_category, $ignoreObjects);
+        }
+
         $this->SendDebug(__FUNCTION__, 'ignoreObjects=' . print_r($ignoreObjects, true), 0);
 
         // zu ignorierende Zahlen
@@ -545,7 +556,7 @@ class IntegrityCheck extends IPSModule
                         continue;
                     }
 
-					/*
+                    /*
                     $jtext = json_decode($text, true);
                     $this->SendDebug(__FUNCTION__, 'flow-script - text=' . print_r($jtext, true), 0);
                     foreach ($jtext['actions'] as $action) {
@@ -572,7 +583,7 @@ class IntegrityCheck extends IPSModule
                             }
                         }
                     }
-					*/
+                     */
                 }
             }
         }
@@ -1018,5 +1029,17 @@ class IntegrityCheck extends IPSModule
             }
         }
         return $ret;
+    }
+
+    private function GetAllChildenIDs($catID, &$objIDs)
+    {
+        $cIDs = IPS_GetChildrenIDs($catID);
+        foreach ($cIDs as $cID) {
+            $obj = IPS_GetObject($catID);
+            if ($obj['ObjectType'] == OBJECTTYPE_CATEGORY) {
+                $this->GetAllChildenIDs($cID, $objIDs);
+            }
+        }
+        $objIDs = array_merge($objIDs, $cIDs);
     }
 }
