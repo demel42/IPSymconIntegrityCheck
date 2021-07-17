@@ -122,9 +122,9 @@ Das Script kann z.B. dazu dienen eine Benachrichtigung auszulösen. Beipiel sieh
 
 GUIDs
 
-- Modul: `{661B9CEA-A3E8-4CE9-8DDA-F5EA62604474}`
+- Modul: `{673E38D6-DB64-2834-28EE-26B338A9A5C2}`
 - Instanzen:
-  - IntegrityCheck: `{673E38D6-DB64-2834-28EE-26B338A9A5C2}`
+  - IntegrityCheck: `{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}`
 
 ## 7. Versions-Historie
 
