@@ -34,7 +34,7 @@
 			"referenced object with ID {$refID} doesn't exists": "referenziertes Objekt mit ID {$refID} existiert nicht",
 			"is faulty": "ist fehlerhaft",
 			"file \"{$incFile}\" is missing": "Datei \"{$incFile}\" fehlt",
-			"script with ID {$id} does'nt exists": "Script mit ID {$id} ist nicht vorhanden",
+			"script with ID {$id} doesn't exists": "Script mit ID {$id} existiert nicht",
 			"file \"{$file}\" is unused": "Datei \"{$file}\" ist ungenutzt",
 			"file \"{$file}\" is missing": "Datei \"{$file}\" fehlt",
 			"row {$row} - a object with ID {$id} doesn't exists": "Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
