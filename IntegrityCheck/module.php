@@ -471,7 +471,7 @@ class IntegrityCheck extends IPSModule
                             $id = $x[1];
                             $incFile = @IPS_GetScriptFile($id);
                             if ($incFile == false) {
-                                $s = $this->TranslateFormat($scriptTypeName . ' with ID {$id} doesn\'t exists', ['{$id}' => $id]);
+                                $s = $this->TranslateFormat('script with ID {$id} doesn\'t exists', ['{$id}' => $id]);
                                 $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                             } else {
                                 if (!in_array($incFile, $fileListINC)) {
