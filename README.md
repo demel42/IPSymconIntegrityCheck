@@ -131,5 +131,5 @@ GUIDs
 - 1.1 @ 24.07.2021 14:22
   - IPS 6.0: define SCRIPTTYPE_FLOW existiert nun standardmässig
 
-- 1.0 @ 18.07.2021 13:46
+- 1.0 @ 18.07.2021 15:36
   - Initiale Version
