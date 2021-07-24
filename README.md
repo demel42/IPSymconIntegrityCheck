@@ -18,7 +18,7 @@
 
 ## 1. Funktionsumfang
 
-Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden 
+Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 
 #### Objekte
 - _ParentID_, _ChildrenIDs_ auf Vorhandensein
@@ -76,7 +76,7 @@ Die Konsole von IP-Symcon öffnen. Im Objektbaum unter Kerninstanzen die Instanz
 
 In der _Modules_ Instanz rechts oben auf den Button __*Hinzufügen*__ drücken.
 
-In dem sich öffnenden Fenster folgende URL hinzufügen: `https://github.com/demel42/IPSymconIntegrityCheck.git` 
+In dem sich öffnenden Fenster folgende URL hinzufügen: `https://github.com/demel42/IPSymconIntegrityCheck.git`
 und mit _OK_ bestätigen. Ggfs. auf anderen Branch wechseln (Modul-Eintrag editieren, _Zweig_ auswählen).
 
 Anschließend erscheint ein Eintrag für das Modul in der Liste der Instanz _Modules_
@@ -127,6 +127,9 @@ GUIDs
   - IntegrityCheck: `{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}`
 
 ## 7. Versions-Historie
+
+- 1.1 @ 24.07.2021 14:22
+  - IPS 6.0: define SCRIPTTYPE_FLOW existiert nun standardmässig
 
 - 1.0 @ 18.07.2021 13:46
   - Initiale Version

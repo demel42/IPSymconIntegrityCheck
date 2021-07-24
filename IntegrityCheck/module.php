@@ -375,7 +375,6 @@ class IntegrityCheck extends IPSModule
         $scriptTypes = [SCRIPTTYPE_PHP];
         $scriptTypeNames = ['php-script'];
         if (IPS_GetKernelVersion() >= 6) {
-            define('SCRIPTTYPE_FLOW', 1);
             $scriptTypes[] = SCRIPTTYPE_FLOW;
             $scriptTypeNames[] = 'flow-script';
         }
