@@ -90,11 +90,19 @@ trait IntegrityCheckCommonLib
         return $str;
     }
 
-    private function LimitOutput($str, $maxLength = 1024 * 10)
+    private function LimitOutput($str, $maxLength = null)
     {
+        $lim = IPS_GetOption('ScriptOutputBufferLimit');
+        if (is_null($maxLength) || $maxLength == 0 || $maxLength > ($lim - 1024)) {
+            $maxLength = $lim / 10;
+        } elseif ($maxLength == -1) {
+            $maxLength = $lim - 1024;
+        }
+
         if (is_array($str)) {
             $str = print_r($str, true);
         }
+
         $len = strlen($str);
         if ($len > $maxLength) {
             $str = substr($str, 0, $maxLength - 1) . '[cut=' . $maxLength . '/' . $len . ']';
