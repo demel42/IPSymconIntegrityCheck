@@ -90,10 +90,14 @@ trait IntegrityCheckCommonLib
         return $str;
     }
 
-    private function LimitOutput(string $str, int $maxLength = 1024 * 10)
+    private function LimitOutput($str, $maxLength = 1024 * 10)
     {
-        if (strlen($str) > $maxLength) {
-            $str = substr($str, 0, $maxLength - 1) . '»';
+        if (is_array($str)) {
+            $str = print_r($str, true);
+        }
+        $len = strlen($str);
+        if ($len > $maxLength) {
+            $str = substr($str, 0, $maxLength - 1) . '[cut=' . $maxLength . '/' . $len . ']';
         }
         return $str;
     }
