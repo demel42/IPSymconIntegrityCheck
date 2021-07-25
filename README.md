@@ -128,8 +128,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.1 @ 24.07.2021 14:22
+- 1.1 @ 25.07.2021 10:25 (beta)
   - IPS 6.0: define SCRIPTTYPE_FLOW existiert nun standardmässig
+  - Fix für zu großen Debug ("Outputbuffer exceeds limits")
 
 - 1.0 @ 18.07.2021 15:36
   - Initiale Version

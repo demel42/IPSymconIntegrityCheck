@@ -401,7 +401,10 @@ class IntegrityCheck extends IPSModule
                     $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
-            $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS=' . print_r($fileListIPS, true), 0);
+            $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: #fileListIPS=' . count($fileListIPS), 0);
+            if (count($fileListIPS) < 1000) {
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS=' . print_r($fileListIPS, true), 0);
+            }
 
             // Script im Filesystem
             $path = IPS_GetKernelDir() . 'scripts';
@@ -426,7 +429,10 @@ class IntegrityCheck extends IPSModule
                 $fileListSYS[] = $file;
             }
             closedir($handle);
-            $this->SendDebug(__FUNCTION__, $scriptTypeName . ' in filesystem: fileListSYS=' . print_r($fileListSYS, true), 0);
+            $this->SendDebug(__FUNCTION__, $scriptTypeName . ' in filesystem: #fileListSYS=' . count($fileListSYS), 0);
+            if (count($fileListSYS) < 1000) {
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . ' in filesystem: fileListSYS=' . print_r($fileListSYS, true), 0);
+            }
 
             if ($scriptType == SCRIPTTYPE_PHP) {
                 foreach ($fileListIPS as $file) {
@@ -482,7 +488,10 @@ class IntegrityCheck extends IPSModule
                         }
                     }
                 }
-                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include: fileListINC=' . print_r($fileListINC, true), 0);
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include: #fileListINC=' . count($fileListINC), 0);
+                if (count($fileListINC) < 1000) {
+                    $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include: fileListINC=' . print_r($fileListINC, true), 0);
+                }
             }
 
             // überflüssige Scripte
@@ -830,8 +839,8 @@ class IntegrityCheck extends IPSModule
             }
         }
         $this->SendDebug(__FUNCTION__, 'counterList=' . print_r($counterList, true), 0);
-        $this->SendDebug(__FUNCTION__, 'messageList,=' . print_r($messageList, true), 0);
-        $this->SendDebug(__FUNCTION__, ' errorCount=' . $errorCount . ', warnCount=' . $warnCount . ', infoCount=' . $infoCount, 0);
+        $this->SendDebug(__FUNCTION__, 'messageList=' . print_r($messageList, true), 0);
+        $this->SendDebug(__FUNCTION__, 'errorCount=' . $errorCount . ', warnCount=' . $warnCount . ', infoCount=' . $infoCount, 0);
 
         // HTML-Text aufbauen
         $html = '';
