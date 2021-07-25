@@ -89,4 +89,12 @@ trait IntegrityCheckCommonLib
         }
         return $str;
     }
+
+    private function LimitOutput(string $str, int $maxLength = 1024 * 10)
+    {
+        if (strlen($str) > $maxLength) {
+            $str = substr($str, 0, $maxLength - 1) . '»';
+        }
+        return $str;
+    }
 }

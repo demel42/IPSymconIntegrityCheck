@@ -458,7 +458,7 @@ class IntegrityCheck extends IPSModule
                             continue;
                         }
                         if (preg_match('/^[\t ]*[\'"]([^\'"]*)[\'"][\t ]*$/', $a, $x)) {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#1 file=' . $x[1] . ': file=' . $file . ', line=' . $line, 0);
+                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#1 file=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                             $incFile = $x[1];
                             if (!in_array($incFile, $fileListINC)) {
                                 $fileListINC[] = $incFile;
@@ -472,7 +472,7 @@ class IntegrityCheck extends IPSModule
                             $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $incFile]);
                             $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
                         } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $line, 0);
+                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                             $id = $x[1];
                             $incFile = @IPS_GetScriptFile($id);
                             if ($incFile == false) {
@@ -484,7 +484,7 @@ class IntegrityCheck extends IPSModule
                                 }
                             }
                         } else {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no match: file=' . $file . ', line=' . $line, 0);
+                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no match: file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                         }
                     }
                 }
@@ -1018,10 +1018,10 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             if (preg_match('/[^!=><]=[\t ]*([0-9]{5})[^0-9]/', $line, $r)) {
-                $this->SendDebug(__FUNCTION__, 'script/object-id - match#1 id=' . $r[1] . ': file=' . $file . ', line=' . $line, 0);
+                $this->SendDebug(__FUNCTION__, 'script/object-id - match#1 id=' . $r[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                 $id = $r[1];
             } elseif (preg_match('/\([\t ]*([0-9]{5})[^0-9]/', $line, $r)) {
-                $this->SendDebug(__FUNCTION__, 'script/object-id - match#2 id=' . $r[1] . ': file=' . $file . ', line=' . $line, 0);
+                $this->SendDebug(__FUNCTION__, 'script/object-id - match#2 id=' . $r[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                 $id = $r[1];
             } else {
                 continue;
