@@ -93,10 +93,14 @@ trait IntegrityCheckCommonLib
     private function LimitOutput($str, $maxLength = null)
     {
         $lim = IPS_GetOption('ScriptOutputBufferLimit');
-        if (is_null($maxLength) || $maxLength == 0 || $maxLength > ($lim - 1024)) {
+        if (is_null($maxLength)) {
             $maxLength = $lim / 10;
-        } elseif ($maxLength == -1) {
+        } elseif ($maxLength == 0) {
             $maxLength = $lim - 1024;
+        } elseif ($maxLength < 0) {
+            $maxLength = $lim - $maxLength;
+        } elseif ($maxLength > $lim) {
+            $maxLength = $lim;
         }
 
         if (is_array($str)) {
@@ -105,7 +109,8 @@ trait IntegrityCheckCommonLib
 
         $len = strlen($str);
         if ($len > $maxLength) {
-            $str = substr($str, 0, $maxLength - 1) . '[cut=' . $maxLength . '/' . $len . ']';
+            $s = '[cut=' . $maxLength . '/' . $len . ']';
+            $str = substr($str, 0, $maxLength - strlen($s)) . $s;
         }
         return $str;
     }
