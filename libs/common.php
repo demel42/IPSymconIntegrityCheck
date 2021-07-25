@@ -95,16 +95,12 @@ trait IntegrityCheckCommonLib
         $lim = IPS_GetOption('ScriptOutputBufferLimit');
         if (is_null($maxLength)) {
             $maxLength = intval($lim / 10);
-            $this->SendDebug(__FUNCTION__, '1: maxLength=' . $maxLength, 0);
         } elseif ($maxLength == 0) {
             $maxLength = $lim - 1024;
-            $this->SendDebug(__FUNCTION__, '2: maxLength=' . $maxLength, 0);
         } elseif ($maxLength < 0) {
             $maxLength = $lim - $maxLength;
-            $this->SendDebug(__FUNCTION__, '3: maxLength=' . $maxLength, 0);
         } elseif ($maxLength > $lim) {
             $maxLength = $lim;
-            $this->SendDebug(__FUNCTION__, '4: maxLength=' . $maxLength, 0);
         }
 
         if (is_array($str)) {
@@ -115,7 +111,6 @@ trait IntegrityCheckCommonLib
         if ($len > $maxLength) {
             $s = '»[cut=' . $maxLength . '/' . $len . ']';
             $cutLen = $maxLength - strlen($s);
-            $this->SendDebug(__FUNCTION__, 'maxLength=' . $maxLength . ', len=' . strlen($str) . ', cutLen=' . $cutLen, 0);
             $str = substr($str, 0, $cutLen) . $s;
         }
         return $str;
