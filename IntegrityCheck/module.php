@@ -353,10 +353,7 @@ class IntegrityCheck extends IPSModule
             if (in_array($instanceID, $ignoreObjects)) {
                 continue;
             }
-            if (IPS_InstanceExists($instanceID) == false) {
-                continue;
-            }
-            $refIDs = IPS_GetReferenceList($instanceID);
+            $refIDs = @IPS_GetReferenceList($instanceID);
             if ($refIDs != false) {
                 foreach ($refIDs as $refID) {
                     if (IPS_ObjectExists($refID) == false) {

@@ -128,7 +128,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.2 @ 13.08.2021 16:06 (beta)
+- 1.2 @ 13.08.2021 18:05 (beta)
   - alle ID's in einer Zeile im PHP-Code eines Scriptes werden geprüft
   - Abfangen eines Fehlers bei ungültigen Instanzen
 
