@@ -94,7 +94,7 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 ### Variablen
 
 | Eigenschaft                                       | Typ     | Standardwert | Beschreibung |
-| :-------------------------------                  | :------ | :----------- | :----------- |
+| :------------------------------------------------ | :------ | :----------- | :----------- |
 | Instanz deaktivieren                              | boolean | false        | Instanz temporär deaktivieren |
 |                                                   |         |              | |
 | Ergebnisse der Prüfung speichern                  | boolean |              | JSON-Struktur mit der ermittelten Werten in Variable _CheckResult_ speichern |
