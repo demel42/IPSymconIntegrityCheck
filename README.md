@@ -128,7 +128,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.1 @ 25.07.2021 18:19 (beta)
+- 1.2 @ 13.08.2021 16:06 (beta)
+  - alle ID's in einer Zeile im PHP-Code eines Scriptes werden geprüft
+  - Abfangen eines Fehlers bei ungültigen Instanzen
+
+- 1.1 @ 25.07.2021 18:19
   - IPS 6.0: define SCRIPTTYPE_FLOW existiert nun standardmässig
   - Fix für zu großen Debug ("Outputbuffer exceeds limits")
 

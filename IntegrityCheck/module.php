@@ -353,6 +353,9 @@ class IntegrityCheck extends IPSModule
             if (in_array($instanceID, $ignoreObjects)) {
                 continue;
             }
+            if (IPS_InstanceExists($instanceID) == false) {
+                continue;
+            }
             $refIDs = IPS_GetReferenceList($instanceID);
             if ($refIDs != false) {
                 foreach ($refIDs as $refID) {
@@ -1011,23 +1014,36 @@ class IntegrityCheck extends IPSModule
             if (preg_match('/' . preg_quote($no_id_check, '/') . '/', $line)) {
                 continue;
             }
-            if (preg_match('/[^!=><]=[\t ]*([0-9]{5})[^0-9]/', $line, $r)) {
-                $this->SendDebug(__FUNCTION__, 'script/object-id - match#1 id=' . $r[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
-                $id = $r[1];
-            } elseif (preg_match('/\([\t ]*([0-9]{5})[^0-9]/', $line, $r)) {
-                $this->SendDebug(__FUNCTION__, 'script/object-id - match#2 id=' . $r[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
-                $id = $r[1];
-            } else {
-                continue;
-            }
-            if (in_array($id, $ignoreNums)) {
-                continue;
-            }
-            if (!in_array($id, $objectList)) {
-                $ret[] = [
-                    'id' => $id,
-                    'row'=> $row,
-                ];
+            $patternV = [
+                '/[^!=><]=[\t ]*([0-9]{5})[^0-9]/',
+                '/[\t ]*=[\t ]*([0-9]{5})[^0-9]/',
+                '/\([\t ]*([0-9]{5})[^0-9]/',
+            ];
+            foreach ($patternV as $pattern) {
+                if (preg_match_all($pattern, $line, $r)) {
+                    foreach ($r[1] as $id) {
+                        $this->SendDebug(__FUNCTION__, 'script/object-id - match#1 id=' . $id . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                        if (in_array($id, $ignoreNums)) {
+                            continue;
+                        }
+                        if (in_array($id, $objectList)) {
+                            continue;
+                        }
+                        $fnd = false;
+                        foreach ($ret as $r) {
+                            if ($r['id'] == $id && $r['row'] == $row) {
+                                $fnd = true;
+                                break;
+                            }
+                        }
+                        if ($fnd == false) {
+                            $ret[] = [
+                                'id' => $id,
+                                'row'=> $row,
+                            ];
+                        }
+                    }
+                }
             }
         }
         return $ret;
