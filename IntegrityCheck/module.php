@@ -205,6 +205,17 @@ class IntegrityCheck extends IPSModule
             'caption' => 'Elements to be ignored ...'
         ];
 
+        $formElements[] = [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'Information',
+            'items'   => [
+                [
+                    'type'    => 'Label',
+                    'caption' => $this->InstanceInfo($this->InstanceID),
+                ],
+            ],
+        ];
+
         return $formElements;
     }
 
@@ -417,7 +428,7 @@ class IntegrityCheck extends IPSModule
                     if (!preg_match('/^.*\.php$/', $file)) {
                         continue;
                     }
-                    if (preg_match('/^.*\.inc\.php$/', $file)) {
+                    if ($file == '__generated.inc.php') {
                         continue;
                     }
                 }
@@ -494,6 +505,11 @@ class IntegrityCheck extends IPSModule
                 if (in_array($file, $fileListIPS) || in_array($file, $fileListINC)) {
                     continue;
                 }
+                /*
+                if (preg_match('/^.*\.inc\.php$/', $file)) {
+                    continue;
+                }
+                 */
                 $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
                 $this->AddMessageEntry($messageList, $this->Translate('scripts'), 0, $s, self::$LEVEL_INFO);
             }
