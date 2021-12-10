@@ -205,17 +205,6 @@ class IntegrityCheck extends IPSModule
             'caption' => 'Elements to be ignored ...'
         ];
 
-        $formElements[] = [
-            'type'    => 'ExpansionPanel',
-            'caption' => 'Information',
-            'items'   => [
-                [
-                    'type'    => 'Label',
-                    'caption' => $this->InstanceInfo($this->InstanceID),
-                ],
-            ],
-        ];
-
         return $formElements;
     }
 
@@ -227,6 +216,17 @@ class IntegrityCheck extends IPSModule
             'type'    => 'Button',
             'caption' => 'Perform check',
             'onClick' => 'IntegrityCheck_PerformCheck($id);'
+        ];
+
+        $formActions[] = [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'Information',
+            'items'   => [
+                [
+                    'type'    => 'Label',
+                    'caption' => $this->InstanceInfo($this->InstanceID),
+                ],
+            ],
         ];
 
         return $formActions;
