@@ -128,6 +128,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.4 @ 16.12.2021 10:43
+  - Absicherung der Anzeige der Modul/Bibliotheks-Informationen
+
 - 1.3 @ 10.12.2021 12:00
   - geänderte Behandlung von "*.inc.php"
 

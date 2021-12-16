@@ -162,7 +162,10 @@ trait IntegrityCheckCommonLib
         $mcID = IPS_GetInstanceListByModuleID('{B8A5067A-AFC2-3798-FEDC-BCD02A45615E}')[0];
         $mcList = MC_GetModuleList($mcID);
         foreach ($mcList as $mc) {
-            $g = MC_GetModule($mcID, $mc);
+            @$g = MC_GetModule($mcID, $mc);
+            if ($g == false) {
+                continue;
+            }
             if ($g['LibraryID'] == $lib['LibraryID']) {
                 $r = MC_GetModuleRepositoryInfo($mcID, $mc);
                 $url = $r['ModuleURL'];
@@ -176,7 +179,7 @@ trait IntegrityCheckCommonLib
                     case 'main':
                         break;
                     default:
-                        $src .= '/' . $branch;
+                        $src .= ' [' . $branch . ']';
                         break;
                 }
                 break;
