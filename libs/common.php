@@ -167,7 +167,9 @@ trait IntegrityCheckCommonLib
                 continue;
             }
             if ($g['LibraryID'] == $lib['LibraryID']) {
-                $r = MC_GetModuleRepositoryInfo($mcID, $mc);
+                @$r = MC_GetModuleRepositoryInfo($mcID, $mc);
+				if ($r==false)
+				continue;
                 $url = $r['ModuleURL'];
                 if (preg_match('/^([^:]*):\/\/[^@]*@(.*)$/', $url, $p)) {
                     $url = $p[1] . '://' . $p[2];
