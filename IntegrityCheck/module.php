@@ -147,7 +147,7 @@ class IntegrityCheck extends IPSModule
                         [
                             'caption'  => 'objects',
                             'name'     => 'ObjectID',
-                            'width'    => 'auto',
+                            'width'    => '400px',
                             'add'      => '',
                             'edit'     => [
                                 'type'    => 'SelectObject',
