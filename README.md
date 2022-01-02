@@ -129,7 +129,7 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.5 @ 17.12.2021 14:21
-  - Korrektur der Breite der zu ignorierenden Onjekte
+  - Korrektur der Breite der zu ignorierenden Objekte
 
 - 1.4 @ 16.12.2021 13:53
   - Absicherung der Anzeige der Modul/Bibliotheks-Informationen
