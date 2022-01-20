@@ -47,6 +47,7 @@
 			"default action with ID {$variableAction} doesn't exists": "Standardaktion mit ID {$variableAction} existiert nicht",
 			"user action with ID {$variableAction} doesn't exists": "Benutzeraktion mit ID {$variableAction} existiert nicht",
 			"is not yet saved": "ist noch nicht gespeichert",
+			"is unused": "wird nicht verwendet",
 
 			"php-script": "PHP-Script",
 			"flow-script": "Ablaufplan",
@@ -65,6 +66,7 @@
 
 			"active": "aktiv",
 			"used": "verwendet",
+			"unused": "nicht verwendet",
 
 			"Timestamp": "Zeitpunkt",
 			"no abnormalities": "keine Auffälligkeiten",

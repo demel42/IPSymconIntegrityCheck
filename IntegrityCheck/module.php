@@ -648,6 +648,7 @@ class IntegrityCheck extends IPSModule
 
         // Variablen
         $variableList = IPS_GetVariableList();
+        $variableUnused = 0;
         foreach ($variableList as $variableID) {
             if (in_array($variableID, $ignoreObjects)) {
                 continue;
@@ -696,9 +697,20 @@ class IntegrityCheck extends IPSModule
                 $s = $this->TranslateFormat('user action with ID {$variableAction} doesn\'t exists', ['{$variableCustomAction}' => $variableCustomAction]);
                 $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_ERROR);
             }
+
+            // Benutzung?
+            if ($variable['VariableUpdated'] == 0) {
+                $obj = IPS_GetObject($variableID);
+                if ($variableAction <= 0 && $variableCustomAction <= 1 && $obj['ObjectIdent'] == false) {
+                    $variableUnused++;
+                    $s = $this->TranslateFormat('is unused');
+                    $this->AddMessageEntry($messageList, 'variables', $variableID, $s, self::$LEVEL_INFO);
+                }
+            }
         }
         $counterList['variables'] = [
-            'total' => count($variableList)
+            'total'  => count($variableList),
+            'unused' => $variableUnused,
         ];
 
         // Medien
@@ -894,6 +906,9 @@ class IntegrityCheck extends IPSModule
                         $s = ' (' . $s . ')';
                     }
                     break;
+                case 'variables':
+                    $s = ' (' . $this->Translate('unused') . '=' . $counters['unused'] . ')';
+                    break;
                 case 'events':
                     $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
                     break;
@@ -969,12 +984,14 @@ class IntegrityCheck extends IPSModule
         }
 
         if ($errorCount) {
-            $s = $this->TranslateFormat('found {$errorCount} errors, {$warnCount} warnings and {$infoCount} informations',
+            $s = $this->TranslateFormat(
+                'found {$errorCount} errors, {$warnCount} warnings and {$infoCount} informations',
                 [
                     '{$errorCount}' => $errorCount,
                     '{$warnCount}'  => $warnCount,
                     '{$infoCount}'  => $infoCount
-                ]);
+                ]
+            );
             $this->LogMessage($s, KL_WARNING);
         }
 

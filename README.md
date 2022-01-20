@@ -128,6 +128,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.6 @ 20.01.2022 11:57 (beta)
+  - Ausgabe der ungenutzen Variablen
+
 - 1.5 @ 17.12.2021 14:21
   - Korrektur der Breite der zu ignorierenden Objekte
 
