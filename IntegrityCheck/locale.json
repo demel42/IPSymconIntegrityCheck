@@ -6,6 +6,13 @@
 			"Basic settings": "Grundeinstellung",
 			"Perform check every X minutes": "Überprüfung alle X Minuten durchführen",
 			"Minutes": "Minuten",
+			"Perform check every X seconds": "Überprüfung alle X Sekunden durchführen",
+			"Seconds": "Sekunden",
+
+			"Duration limit": "Laufzeit-Grenze",
+			"Information": "Information",
+			"Warning": "Warnung",
+			"Error": "Fehler",
 
 			"Perform check": "Überprüfung durchführen",
 
@@ -18,7 +25,7 @@
 
 			"Save complete results of the test": "Ergebnisse der Prüfung vollständig speichern",
 			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
-			"Script called after test execution": "Script, das nach Testdurchführung aufgerufen wird",
+			"Script called after test execution": "Skript, das nach Testdurchführung aufgerufen wird",
 
 			"Overview": "Übersicht",
 			"Start time": "Startzeitpunkt",
@@ -34,7 +41,7 @@
 			"referenced object with ID {$refID} doesn't exists": "referenziertes Objekt mit ID {$refID} existiert nicht",
 			"is faulty": "ist fehlerhaft",
 			"file \"{$incFile}\" is missing": "Datei \"{$incFile}\" fehlt",
-			"script with ID {$id} doesn't exists": "Script mit ID {$id} existiert nicht",
+			"script with ID {$id} doesn't exists": "Skript mit ID {$id} existiert nicht",
 			"file \"{$file}\" is unused": "Datei \"{$file}\" ist ungenutzt",
 			"file \"{$file}\" is missing": "Datei \"{$file}\" fehlt",
 			"row {$row} - a object with ID {$id} doesn't exists": "Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
@@ -46,10 +53,11 @@
 			"user profile \"{$variableCustomProfile}\" has wrong type": "Benutzerprofil \"{$variableCustomProfile}\" hat falschen Typ",
 			"default action with ID {$variableAction} doesn't exists": "Standardaktion mit ID {$variableAction} existiert nicht",
 			"user action with ID {$variableAction} doesn't exists": "Benutzeraktion mit ID {$variableAction} existiert nicht",
+			"script with ID {$scriptID} is running since {$duration}": "Skript mit ID {$scriptID} läuft seit {$duration}",
 			"is not yet saved": "ist noch nicht gespeichert",
 			"is unused": "wird nicht verwendet",
 
-			"php-script": "PHP-Script",
+			"php-script": "PHP-Skript",
 			"flow-script": "Ablaufplan",
 
 			"categories": "Kategorien",
@@ -57,7 +65,7 @@
 			"links": "Verknüpfungen",
 			"modules": "Module",
 			"instances": "Instanzen",
-			"scripts": "Scripte",
+			"scripts": "Skripte",
 			"events": "Ereignisse",
 			"variables": "Variablen",
 			"media": "Medien",

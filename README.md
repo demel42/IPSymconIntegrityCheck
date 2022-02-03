@@ -128,7 +128,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6 @ 20.01.2022 11:57 (beta)
+- 1.6.1 @ 03.02.2022 15:47 (beta)
+  - monitor threads
+
+- 1.6 @ 20.01.2022 11:57
   - Ausgabe der ungenutzen Variablen
 
 - 1.5 @ 17.12.2021 14:21

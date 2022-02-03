@@ -24,7 +24,13 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyBoolean('save_checkResult', false);
         $this->RegisterPropertyInteger('post_script', 0);
 
+        $this->RegisterPropertyInteger('monitor_interval', '60');
+        $this->RegisterPropertyInteger('thread_limit_info', 10);
+        $this->RegisterPropertyInteger('thread_limit_warn', 30);
+        $this->RegisterPropertyInteger('thread_limit_error', 120);
+
         $this->RegisterTimer('PerformCheck', 0, 'IntegrityCheck_PerformCheck(' . $this->InstanceID . ');');
+        $this->RegisterTimer('MonitorThreads', 0, 'IntegrityCheck_MonitorThreads(' . $this->InstanceID . ');');
     }
 
     public function ApplyChanges()
@@ -47,6 +53,7 @@ class IntegrityCheck extends IPSModule
         $module_disable = $this->ReadPropertyBoolean('module_disable');
         if ($module_disable) {
             $this->SetTimerInterval('PerformCheck', 0);
+            $this->SetTimerInterval('MonitorThreads', 0);
             $this->SetStatus(IS_INACTIVE);
             return;
         }
@@ -76,22 +83,6 @@ class IntegrityCheck extends IPSModule
 
         $this->SetStatus(IS_ACTIVE);
         $this->SetUpdateInterval();
-    }
-
-    public function GetConfigurationForm()
-    {
-        $formElements = $this->GetFormElements();
-        $formActions = $this->GetFormActions();
-        $formStatus = $this->GetFormStatus();
-
-        $form = json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
-        if ($form == '') {
-            $this->SendDebug(__FUNCTION__, 'json_error=' . json_last_error_msg(), 0);
-            $this->SendDebug(__FUNCTION__, '=> formElements=' . print_r($formElements, true), 0);
-            $this->SendDebug(__FUNCTION__, '=> formActions=' . print_r($formActions, true), 0);
-            $this->SendDebug(__FUNCTION__, '=> formStatus=' . print_r($formStatus, true), 0);
-        }
-        return $form;
     }
 
     private function GetFormElements()
@@ -205,6 +196,44 @@ class IntegrityCheck extends IPSModule
             'caption' => 'Elements to be ignored ...'
         ];
 
+        $formElements[] = [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'Threads',
+            'items'   => [
+                [
+                    'type'     => 'Label',
+                    'caption'  => 'Duration limit',
+                ],
+                [
+                    'type'    => 'IntervalBox',
+                    'name'    => 'thread_limit_info',
+                    'caption' => 'Information'
+                ],
+                [
+                    'type'    => 'IntervalBox',
+                    'name'    => 'thread_limit_warn',
+                    'caption' => 'Warning'
+                ],
+                [
+                    'type'    => 'IntervalBox',
+                    'name'    => 'thread_limit_error',
+                    'caption' => 'Error'
+                ],
+                [
+                    'type'    => 'Label',
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Perform check every X seconds'
+                ],
+                [
+                    'type'    => 'IntervalBox',
+                    'name'    => 'monitor_interval',
+                    'caption' => 'Seconds'
+                ]
+            ],
+        ];
+
         return $formElements;
     }
 
@@ -237,6 +266,10 @@ class IntegrityCheck extends IPSModule
         $min = $this->ReadPropertyInteger('update_interval');
         $msec = $min > 0 ? $min * 1000 * 60 : 0;
         $this->SetTimerInterval('PerformCheck', $msec);
+
+        $sec = $this->ReadPropertyInteger('monitor_interval');
+        $msec = $sec > 0 ? $sec * 1000 : 0;
+        $this->SetTimerInterval('MonitorThreads', $msec);
     }
 
     public function PerformCheck()
@@ -412,7 +445,7 @@ class IntegrityCheck extends IPSModule
                 }
                 if ($script['ScriptIsBroken']) {
                     $s = $this->Translate('ist fehlerhaft');
-                    $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
             $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS (count=' . count($fileListIPS) . ')=' . $this->LimitOutput($fileListIPS), 0);
@@ -478,14 +511,14 @@ class IntegrityCheck extends IPSModule
                                 continue;
                             }
                             $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $incFile]);
-                            $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                            $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                         } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
                             $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                             $id = $x[1];
                             $incFile = @IPS_GetScriptFile($id);
                             if ($incFile == false) {
                                 $s = $this->TranslateFormat('script with ID {$id} doesn\'t exists', ['{$id}' => $id]);
-                                $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                             } else {
                                 if (!in_array($incFile, $fileListINC)) {
                                     $fileListINC[] = $incFile;
@@ -511,7 +544,7 @@ class IntegrityCheck extends IPSModule
                 }
                  */
                 $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, $this->Translate('scripts'), 0, $s, self::$LEVEL_INFO);
+                $this->AddMessageEntry($messageList, 'scripts', 0, $s, self::$LEVEL_INFO);
             }
 
             // fehlende Scripte
@@ -529,7 +562,7 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
             }
 
             if ($scriptType == SCRIPTTYPE_PHP) {
@@ -553,7 +586,7 @@ class IntegrityCheck extends IPSModule
                         $row = $r['row'];
                         if ($id != false) {
                             $s = $this->TranslateFormat('row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
-                            $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                            $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                         }
                     }
                 }
@@ -588,7 +621,7 @@ class IntegrityCheck extends IPSModule
                                 $row = $r['row'];
                                 if ($id != false) {
                                     $s = $this->TranslateFormat('flow/script - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
-                                    $this->AddMessageEntry($messageList, $this->Translate('scripts'), $scriptID, $s, self::$LEVEL_ERROR);
+                                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                                 }
                             }
                         }
@@ -804,21 +837,61 @@ class IntegrityCheck extends IPSModule
             '5min'  => $timer5MinCount,
         ];
 
+        $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
+        $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
+        $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+
         // Threads
         $threadList = IPS_GetScriptThreadList();
         $threadUsed = 0;
+        $threadInfo = 0;
+        $threadWarn = 0;
+        $threadError = 0;
         foreach ($threadList as $t => $i) {
             $thread = IPS_GetScriptThread($i);
             // $this->SendDebug(__FUNCTION__, 'thread=' . print_r($thread, true) . ', t=' . print_r($t, true) . ', i=' . $i, 0);
 
-            $ScriptID = $thread['ScriptID'];
-            if ($ScriptID != 0) {
-                $threadUsed++;
+            $scriptID = $thread['ScriptID'];
+            if ($scriptID == 0) {
+                continue;
+            }
+
+            $threadUsed++;
+
+            $sec = $now - $thread['StartTime'];
+            $duration = '';
+            if ($sec > 3600) {
+                $duration .= sprintf('%dh', floor($sec / 3600));
+                $sec = $sec % 3600;
+            }
+            if ($sec > 60) {
+                $duration .= sprintf('%dm', floor($sec / 60));
+                $sec = $sec % 60;
+            }
+            if ($sec > 0 || $duration == '') {
+                $duration .= sprintf('%ds', $sec);
+                $sec = floor($sec);
+            }
+            $sec = $now - $thread['StartTime'];
+            $s = $this->TranslateFormat('script with ID {$scriptID} is running since {$duration}', ['{$scriptID}' => $scriptID, '{$duration}' => $duration]);
+            $this->SendDebug(__FUNCTION__, 's=' . $s, 0);
+            if ($sec >= $thread_limit_error) {
+                $threadError++;
+                $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
+            } elseif ($sec >= $thread_limit_warn) {
+                $threadWarn++;
+                $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_WARN);
+            } elseif ($sec >= $thread_limit_info) {
+                $threadInfo++;
+                $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_INFO);
             }
         }
         $counterList['threads'] = [
             'total' => count($threadList),
-            'used'  => $threadUsed
+            'used'  => $threadUsed,
+            'info'  => $threadInfo,
+            'warn'  => $threadWarn,
+            'error' => $threadError,
         ];
 
         /*
@@ -913,7 +986,17 @@ class IntegrityCheck extends IPSModule
                     $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
                     break;
                 case 'threads':
-                    $s = ' (' . $this->Translate('used') . '=' . $counters['used'] . ')';
+                    $s = ' (' . $this->Translate('used') . '=' . $counters['used'];
+                    if ($counters['error']) {
+                        $s .= ', >' . $thread_limit_error . 's=' . $counters['error'];
+                    }
+                    if ($counters['warn']) {
+                        $s .= ', >' . $thread_limit_warn . 's=' . $counters['warn'];
+                    }
+                    if ($counters['info']) {
+                        $s .= ', >' . $thread_limit_info . 's=' . $counters['info'];
+                    }
+                    $s .= ')';
                     break;
                 default:
                     $s = '';
@@ -933,7 +1016,7 @@ class IntegrityCheck extends IPSModule
                             $col = 'grey';
                             break;
                         case self::$LEVEL_WARN:
-                            $col = 'yellow';
+                            $col = 'gold';
                             break;
                         case self::$LEVEL_ERROR:
                         default:
@@ -1089,5 +1172,50 @@ class IntegrityCheck extends IPSModule
             }
         }
         $objIDs = array_merge($objIDs, $cIDs);
+    }
+
+    public function MonitorThreads()
+    {
+        $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
+        $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
+        $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+
+        $now = time();
+
+        $threadList = IPS_GetScriptThreadList();
+
+        foreach ($threadList as $t => $i) {
+            $thread = IPS_GetScriptThread($i);
+
+            $scriptID = $thread['ScriptID'];
+            if ($scriptID == 0) {
+                continue;
+            }
+            $threadId = $thread['ThreadID'];
+            $sender = $thread['Sender'];
+            $scriptName = IPS_GetName($scriptID);
+
+            $sec = $now - $thread['StartTime'];
+            $duration = '';
+            if ($sec > 3600) {
+                $duration .= sprintf('%dh', floor($sec / 3600));
+                $sec = $sec % 3600;
+            }
+            if ($sec > 60) {
+                $duration .= sprintf('%dm', floor($sec / 60));
+                $sec = $sec % 60;
+            }
+            if ($sec > 0 || $duration == '') {
+                $duration .= sprintf('%ds', $sec);
+                $sec = floor($sec);
+            }
+            $s = 'thread=' . $threadId . ', script=' . $scriptName . '(' . $scriptID . '), sender=' . $sender . ', duration=' . $duration;
+            if ($sec >= $thread_limit_error) {
+                $this->LogMessage(__FUNCTION__ . ': ' . $s, KL_ERROR);
+            } elseif ($sec >= $thread_limit_warn) {
+                $this->LogMessage(__FUNCTION__ . ': ' . $s, KL_WARNING);
+            }
+            $this->SendDebug(__FUNCTION__, $s, 0);
+        }
     }
 }
