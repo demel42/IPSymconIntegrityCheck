@@ -89,6 +89,8 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 
 `boolean IntegrityCheck_PerformCheck(integer $InstanzID)`<br>
 
+`boolean IntegrityCheck_MonitorThreads(integer $InstanzID)`<br>
+
 ## 5. Konfiguration:
 
 ### Variablen
@@ -107,6 +109,11 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 | PHP-Kommentar                                     | string  |              | PHP-Kommentar, um einzelne Zeilen auszunehmen |
 |                                                   |         |              | |
 | Prüfung durchführen ...                           | integer | 60           | Durchführungsintervall, Angabe in Minuten |
+|                                                   |         |              | |
+| Threads-Infogrenze                                | integer | 10           | Laufzeit in Sekunden zur Information |
+| Threads-Warngrenze                                | integer | 30           | Laufzeit in Sekunden zur Warnung |
+| Threads-Fehlergrenze                              | integer | 120          | Laufzeit in Sekunden zur Fehlermeldung |
+|                                                   |         |              | |
 
 - *... Zahlen*
 die hier angegebenen 5-stelligen Zahlen werden bei der Prüfung von Scripten nicht als Objekt-ID's behandelt und geprüft.
@@ -129,7 +136,7 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.6.1 @ 03.02.2022 15:47 (beta)
-  - monitor threads
+  - Threads überwachen (Langläufer)
 
 - 1.6 @ 20.01.2022 11:57
   - Ausgabe der ungenutzen Variablen

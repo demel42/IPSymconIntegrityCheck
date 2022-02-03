@@ -16,7 +16,7 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterPropertyBoolean('module_disable', false);
 
-        $this->RegisterPropertyInteger('update_interval', '60');
+        $this->RegisterPropertyInteger('update_interval', 60);
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
         $this->RegisterPropertyInteger('ignore_category', 0);
         $this->RegisterPropertyString('ignore_nums', json_encode([]));
@@ -24,7 +24,7 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyBoolean('save_checkResult', false);
         $this->RegisterPropertyInteger('post_script', 0);
 
-        $this->RegisterPropertyInteger('monitor_interval', '60');
+        $this->RegisterPropertyInteger('monitor_interval', 60);
         $this->RegisterPropertyInteger('thread_limit_info', 10);
         $this->RegisterPropertyInteger('thread_limit_warn', 30);
         $this->RegisterPropertyInteger('thread_limit_error', 120);
