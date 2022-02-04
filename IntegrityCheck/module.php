@@ -10,6 +10,13 @@ class IntegrityCheck extends IPSModule
     use IntegrityCheckCommonLib;
     use IntegrityCheckLocalLib;
 
+    public function InstallVarProfiles(bool $reInstall = false)
+    {
+        if ($reInstall) {
+            $this->SendDebug(__FUNCTION__, 'reInstall=' . $this->bool2str($reInstall), 0);
+        }
+    }
+
     public function Create()
     {
         parent::Create();
@@ -31,6 +38,23 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterTimer('PerformCheck', 0, 'IntegrityCheck_PerformCheck(' . $this->InstanceID . ');');
         $this->RegisterTimer('MonitorThreads', 0, 'IntegrityCheck_MonitorThreads(' . $this->InstanceID . ');');
+
+        $this->InstallVarProfiles(false);
+    }
+
+    private function CheckConfiguration()
+    {
+        $s = '';
+        $r = [];
+
+        if ($r != []) {
+            $s = $this->Translate('The following points of the configuration are incorrect') . ':' . PHP_EOL;
+            foreach ($r as $p) {
+                $s .= '- ' . $p . PHP_EOL;
+            }
+        }
+
+        return $s;
     }
 
     public function ApplyChanges()
@@ -49,14 +73,6 @@ class IntegrityCheck extends IPSModule
         $this->MaintainVariable('LastUpdate', $this->Translate('Last update'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
 
         $this->MaintainVariable('CheckResult', $this->Translate('Check result'), VARIABLETYPE_STRING, '', $vpos++, $save_checkResult);
-
-        $module_disable = $this->ReadPropertyBoolean('module_disable');
-        if ($module_disable) {
-            $this->SetTimerInterval('PerformCheck', 0);
-            $this->SetTimerInterval('MonitorThreads', 0);
-            $this->SetStatus(IS_INACTIVE);
-            return;
-        }
 
         $refs = $this->GetReferenceList();
         foreach ($refs as $ref) {
@@ -81,6 +97,21 @@ class IntegrityCheck extends IPSModule
             }
         }
 
+        $module_disable = $this->ReadPropertyBoolean('module_disable');
+        if ($module_disable) {
+            $this->SetTimerInterval('PerformCheck', 0);
+            $this->SetTimerInterval('MonitorThreads', 0);
+            $this->SetStatus(IS_INACTIVE);
+            return;
+        }
+
+        if ($this->CheckConfiguration() != false) {
+            $this->SetTimerInterval('PerformCheck', 0);
+            $this->SetTimerInterval('MonitorThreads', 0);
+            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            return;
+        }
+
         $this->SetStatus(IS_ACTIVE);
         $this->SetUpdateInterval();
     }
@@ -94,6 +125,17 @@ class IntegrityCheck extends IPSModule
             'name'    => 'module_disable',
             'caption' => 'Disable instance'
         ];
+
+        $s = $this->CheckConfiguration();
+        if ($s != '') {
+            $formElements[] = [
+                'type'    => 'Label',
+                'caption' => $s
+            ];
+            $formElements[] = [
+                'type'    => 'Label',
+            ];
+        }
 
         $items = [];
         $items[] = [
@@ -272,6 +314,139 @@ class IntegrityCheck extends IPSModule
         $this->SetTimerInterval('MonitorThreads', $msec);
     }
 
+    private function BuildOverview($checkResult)
+    {
+        $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
+        $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
+        $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+
+        $tstamp = $checkResult['timestamp'];
+        $counterList = $checkResult['counterList'];
+        $messageList = $checkResult['messageList'];
+
+        $scriptTypes = [SCRIPTTYPE_PHP];
+        $scriptTypeNames = ['php-script'];
+        if (IPS_GetKernelVersion() >= 6) {
+            if (!defined('SCRIPTTYPE_FLOW')) {
+                define('SCRIPTTYPE_FLOW', 1);
+            }
+            $scriptTypes[] = SCRIPTTYPE_FLOW;
+            $scriptTypeNames[] = 'flow-script';
+        }
+
+        // HTML-Text aufbauen
+        $html = '';
+        $html .= '<head>' . PHP_EOL;
+        $html .= '<style>' . PHP_EOL;
+        $html .= 'body { margin: 1; padding: 0; font-family: "Open Sans", sans-serif; font-size: 16px; }' . PHP_EOL;
+        $html .= 'table { border-collapse: collapse; border: 0px solid; margin: 0.5em;}' . PHP_EOL;
+        $html .= 'th, td { padding: 1; }' . PHP_EOL;
+        $html .= 'thead, tdata { text-align: left; }' . PHP_EOL;
+        $html .= '#spalte_title { width: 250px; }' . PHP_EOL;
+        $html .= '#spalte_value { }' . PHP_EOL;
+        $html .= '</style>' . PHP_EOL;
+        $html .= '</head>' . PHP_EOL;
+        $html .= '<body>' . PHP_EOL;
+        $html .= '<table>' . PHP_EOL;
+        $html .= '<colgroup><col id="spalte_title"></colgroup>' . PHP_EOL;
+        $html .= '<colgroup><col id="spalte_value"></colgroup>' . PHP_EOL;
+
+        $html .= '<tr><td>' . $this->Translate('Timestamp') . '</td><td>' . date('d.m.Y H:i:s', $tstamp) . '</td></tr>' . PHP_EOL;
+        $html .= '<tr><td>&nbsp;</td></tr>' . PHP_EOL;
+
+        foreach ($counterList as $tag => $counters) {
+            $total = $counters['total'];
+            switch ($tag) {
+                case 'timer':
+                    $s = ' (1m=' . $counters['1min'] . ', 5m=' . $counters['5min'] . ')';
+                    break;
+                case 'instances':
+                    $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
+                    break;
+                case 'scripts':
+                    $s = '';
+                    if (IPS_GetKernelVersion() >= 6) {
+                        foreach ($scriptTypes as $scriptType) {
+                            if ($s != '') {
+                                $s .= ', ';
+                            }
+                            $scriptTypeName = $scriptTypeNames[$scriptType];
+                            $s .= $this->Translate($scriptTypeName) . '=' . $counters['types'][$scriptType];
+                        }
+                        $s = ' (' . $s . ')';
+                    }
+                    break;
+                case 'variables':
+                    $s = ' (' . $this->Translate('unused') . '=' . $counters['unused'] . ')';
+                    break;
+                case 'events':
+                    $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
+                    break;
+                case 'threads':
+                    $s = ' (' . $this->Translate('used') . '=' . $counters['used'];
+                    if ($counters['error']) {
+                        $s .= ', >' . $thread_limit_error . 's=' . $counters['error'];
+                    }
+                    if ($counters['warn']) {
+                        $s .= ', >' . $thread_limit_warn . 's=' . $counters['warn'];
+                    }
+                    if ($counters['info']) {
+                        $s .= ', >' . $thread_limit_info . 's=' . $counters['info'];
+                    }
+                    $s .= ')';
+                    break;
+                default:
+                    $s = '';
+                    break;
+            }
+            $html .= '<tr><td>' . $this->Translate($tag) . '</td><td>' . $total . $s . '</td></tr>' . PHP_EOL;
+        }
+
+        $html .= '</table>' . PHP_EOL;
+        $n_messages = 0;
+        foreach ($messageList as $tag => $entries) {
+            if ($entries == []) {
+                continue;
+            }
+            $n_messages++;
+            $html .= '<b>' . $this->Translate($tag) . ':</b><br>' . PHP_EOL;
+            foreach ($entries as $entry) {
+                $lvl = $entry['Level'];
+                switch ($lvl) {
+                        case self::$LEVEL_INFO:
+                            $col = 'grey';
+                            break;
+                        case self::$LEVEL_WARN:
+                            $col = 'gold';
+                            break;
+                        case self::$LEVEL_ERROR:
+                        default:
+                            $col = 'red';
+                            break;
+                    }
+                $html .= '<span style="color: ' . $col . ';">&nbsp;&nbsp;&nbsp;';
+                $id = $entry['ID'];
+                if ($id != 0) {
+                    $html .= '#' . $id;
+                    $loc = @IPS_GetLocation($id);
+                    if ($loc != false) {
+                        $html .= '(' . $loc . ')';
+                    }
+                    $html .= ': ';
+                }
+                $html .= $entry['Msg'];
+                $html .= '</span><br>' . PHP_EOL;
+            }
+            $html .= '<br>' . PHP_EOL;
+        }
+        if ($n_messages == 0) {
+            $html .= '<br>' . $this->Translate('no abnormalities') . '<br>' . PHP_EOL;
+        }
+        $html .= '</body>' . PHP_EOL;
+
+        return $html;
+    }
+
     public function PerformCheck()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
@@ -315,8 +490,6 @@ class IntegrityCheck extends IPSModule
             }
         }
         $this->SendDebug(__FUNCTION__, 'ignoreNums=' . print_r($ignoreNums, true), 0);
-
-        $startTime = IPS_GetKernelStartTime();
 
         $now = time();
 
@@ -851,14 +1024,14 @@ class IntegrityCheck extends IPSModule
             $thread = IPS_GetScriptThread($i);
             // $this->SendDebug(__FUNCTION__, 'thread=' . print_r($thread, true) . ', t=' . print_r($t, true) . ', i=' . $i, 0);
 
-            $scriptID = $thread['ScriptID'];
-            if ($scriptID == 0) {
+            $startTime = $thread['StartTime'];
+            if ($startTime == 0) {
                 continue;
             }
 
             $threadUsed++;
 
-            $sec = $now - $thread['StartTime'];
+            $sec = $now - $startTime;
             $duration = '';
             if ($sec > 3600) {
                 $duration .= sprintf('%dh', floor($sec / 3600));
@@ -872,9 +1045,17 @@ class IntegrityCheck extends IPSModule
                 $duration .= sprintf('%ds', $sec);
                 $sec = floor($sec);
             }
-            $sec = $now - $thread['StartTime'];
-            $s = $this->TranslateFormat('script with ID {$scriptID} is running since {$duration}', ['{$scriptID}' => $scriptID, '{$duration}' => $duration]);
-            $this->SendDebug(__FUNCTION__, 's=' . $s, 0);
+            $sec = $now - $startTime;
+
+            $scriptID = $thread['ScriptID'];
+            if ($scriptID > 0) {
+                $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
+                $s = $this->TranslateFormat('script "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
+            } else {
+                $ident = $thread['FilePath'];
+                $s = $this->TranslateFormat('function "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
+            }
+
             if ($sec >= $thread_limit_error) {
                 $threadError++;
                 $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
@@ -893,25 +1074,6 @@ class IntegrityCheck extends IPSModule
             'warn'  => $threadWarn,
             'error' => $threadError,
         ];
-
-        /*
-        $check_script = $this->ReadPropertyInteger('check_script');
-        if ($check_script > 0) {
-            $checkResult = [
-                'counterList'  => $counterList,
-                'messageList'  => $messageList,
-            ];
-            $ret = IPS_RunScriptWaitEx($check_script, ['InstanceID' => $this->InstanceID, 'CheckResult' => json_encode($checkResult)]);
-            if ($ret) {
-                $jret = json_decode($ret, true);
-                if (isset($jret['counterList'])
-                    $counterList = $jret['counterList'];
-                if (isset($jret['messageList']))
-                    $messageList = $jret['messageList'];
-            }
-            $this->SendDebug(__FUNCTION__, 'call script ' . IPS_GetParent($post_script) . '\\' . IPS_GetName($post_script) . ', ret=' . $ret, 0);
-        }
-         */
 
         $errorCount = 0;
         $warnCount = 0;
@@ -937,121 +1099,6 @@ class IntegrityCheck extends IPSModule
         $this->SendDebug(__FUNCTION__, 'messageList=' . print_r($messageList, true), 0);
         $this->SendDebug(__FUNCTION__, 'errorCount=' . $errorCount . ', warnCount=' . $warnCount . ', infoCount=' . $infoCount, 0);
 
-        // HTML-Text aufbauen
-        $html = '';
-        $html .= '<head>' . PHP_EOL;
-        $html .= '<style>' . PHP_EOL;
-        $html .= 'body { margin: 1; padding: 0; font-family: "Open Sans", sans-serif; font-size: 16px; }' . PHP_EOL;
-        $html .= 'table { border-collapse: collapse; border: 0px solid; margin: 0.5em;}' . PHP_EOL;
-        $html .= 'th, td { padding: 1; }' . PHP_EOL;
-        $html .= 'thead, tdata { text-align: left; }' . PHP_EOL;
-        $html .= '#spalte_title { width: 250px; }' . PHP_EOL;
-        $html .= '#spalte_value { }' . PHP_EOL;
-        $html .= '</style>' . PHP_EOL;
-        $html .= '</head>' . PHP_EOL;
-        $html .= '<body>' . PHP_EOL;
-        $html .= '<table>' . PHP_EOL;
-        $html .= '<colgroup><col id="spalte_title"></colgroup>' . PHP_EOL;
-        $html .= '<colgroup><col id="spalte_value"></colgroup>' . PHP_EOL;
-
-        $html .= '<tr><td>' . $this->Translate('Timestamp') . '</td><td>' . date('d.m.Y H:i:s', $now) . '</td></tr>' . PHP_EOL;
-        $html .= '<tr><td>&nbsp;</td></tr>' . PHP_EOL;
-
-        foreach ($counterList as $tag => $counters) {
-            $total = $counters['total'];
-            switch ($tag) {
-                case 'timer':
-                    $s = ' (1m=' . $counters['1min'] . ', 5m=' . $counters['5min'] . ')';
-                    break;
-                case 'instances':
-                    $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
-                    break;
-                case 'scripts':
-                    $s = '';
-                    if (IPS_GetKernelVersion() >= 6) {
-                        foreach ($scriptTypes as $scriptType) {
-                            if ($s != '') {
-                                $s .= ', ';
-                            }
-                            $scriptTypeName = $scriptTypeNames[$scriptType];
-                            $s .= $this->Translate($scriptTypeName) . '=' . $counters['types'][$scriptType];
-                        }
-                        $s = ' (' . $s . ')';
-                    }
-                    break;
-                case 'variables':
-                    $s = ' (' . $this->Translate('unused') . '=' . $counters['unused'] . ')';
-                    break;
-                case 'events':
-                    $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
-                    break;
-                case 'threads':
-                    $s = ' (' . $this->Translate('used') . '=' . $counters['used'];
-                    if ($counters['error']) {
-                        $s .= ', >' . $thread_limit_error . 's=' . $counters['error'];
-                    }
-                    if ($counters['warn']) {
-                        $s .= ', >' . $thread_limit_warn . 's=' . $counters['warn'];
-                    }
-                    if ($counters['info']) {
-                        $s .= ', >' . $thread_limit_info . 's=' . $counters['info'];
-                    }
-                    $s .= ')';
-                    break;
-                default:
-                    $s = '';
-                    break;
-            }
-            $html .= '<tr><td>' . $this->Translate($tag) . '</td><td>' . $total . $s . '</td></tr>' . PHP_EOL;
-        }
-
-        $html .= '</table>' . PHP_EOL;
-        if (count($messageList)) {
-            foreach ($messageList as $tag => $entries) {
-                $html .= '<b>' . $this->Translate($tag) . ':</b><br>' . PHP_EOL;
-                foreach ($entries as $entry) {
-                    $lvl = $entry['Level'];
-                    switch ($lvl) {
-                        case self::$LEVEL_INFO:
-                            $col = 'grey';
-                            break;
-                        case self::$LEVEL_WARN:
-                            $col = 'gold';
-                            break;
-                        case self::$LEVEL_ERROR:
-                        default:
-                            $col = 'red';
-                            break;
-                    }
-                    $html .= '<span style="color: ' . $col . ';">&nbsp;&nbsp;&nbsp;';
-                    $id = $entry['ID'];
-                    if ($id != 0) {
-                        $html .= '#' . $id;
-                        $loc = @IPS_GetLocation($id);
-                        if ($loc != false) {
-                            $html .= '(' . $loc . ')';
-                        }
-                        $html .= ': ';
-                    }
-                    $html .= $entry['Msg'];
-                    $html .= '</span><br>' . PHP_EOL;
-                }
-                $html .= '<br>' . PHP_EOL;
-            }
-        } else {
-            $html .= '<br>' . $this->Translate('no abnormalities') . '<br>' . PHP_EOL;
-        }
-        $html .= '</body>' . PHP_EOL;
-        $this->SetValue('Overview', $html);
-
-        $this->SetValue('StartTime', $startTime);
-
-        $this->SetValue('ErrorCount', $errorCount);
-        $this->SetValue('WarnCount', $warnCount);
-        $this->SetValue('InfoCount', $infoCount);
-
-        $this->SetValue('LastUpdate', $now);
-
         $checkResult = [
             'timestamp'    => $now,
             'counterList'  => $counterList,
@@ -1060,6 +1107,18 @@ class IntegrityCheck extends IPSModule
             'warnCount'    => $warnCount,
             'infoCount'    => $infoCount,
         ];
+
+        $html = $this->BuildOverview($checkResult);
+        $this->SetValue('Overview', $html);
+
+        $startTime = IPS_GetKernelStartTime();
+        $this->SetValue('StartTime', $startTime);
+
+        $this->SetValue('ErrorCount', $errorCount);
+        $this->SetValue('WarnCount', $warnCount);
+        $this->SetValue('InfoCount', $infoCount);
+
+        $this->SetValue('LastUpdate', $now);
 
         $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
         if ($save_checkResult) {
@@ -1180,22 +1239,40 @@ class IntegrityCheck extends IPSModule
         $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
         $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
 
+        $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
+        if ($save_checkResult) {
+            $old_CheckResult = $this->GetValue('CheckResult');
+            $checkResult = json_decode($old_CheckResult, true);
+        } else {
+            $checkResult = false;
+        }
+        $this->SendDebug(__FUNCTION__, 'checkResult=' . print_r($checkResult, true), 0);
+
         $now = time();
 
-        $threadList = IPS_GetScriptThreadList();
+        if ($checkResult != false) {
+            $messageList = $checkResult['messageList'];
+            $messageList['threads'] = [];
+        }
 
+        $threadList = IPS_GetScriptThreadList();
+        $threadUsed = 0;
+        $threadInfo = 0;
+        $threadWarn = 0;
+        $threadError = 0;
         foreach ($threadList as $t => $i) {
             $thread = IPS_GetScriptThread($i);
 
-            $scriptID = $thread['ScriptID'];
-            if ($scriptID == 0) {
+            $startTime = $thread['StartTime'];
+            if ($startTime == 0) {
                 continue;
             }
-            $threadId = $thread['ThreadID'];
-            $sender = $thread['Sender'];
-            $scriptName = IPS_GetName($scriptID);
 
-            $sec = $now - $thread['StartTime'];
+            $this->SendDebug(__FUNCTION__, 'thread #' . $i . '=' . print_r($thread, true), 0);
+
+            $threadUsed++;
+
+            $sec = $now - $startTime;
             $duration = '';
             if ($sec > 3600) {
                 $duration .= sprintf('%dh', floor($sec / 3600));
@@ -1209,13 +1286,94 @@ class IntegrityCheck extends IPSModule
                 $duration .= sprintf('%ds', $sec);
                 $sec = floor($sec);
             }
-            $s = 'thread=' . $threadId . ', script=' . $scriptName . '(' . $scriptID . '), sender=' . $sender . ', duration=' . $duration;
-            if ($sec >= $thread_limit_error) {
-                $this->LogMessage(__FUNCTION__ . ': ' . $s, KL_ERROR);
-            } elseif ($sec >= $thread_limit_warn) {
-                $this->LogMessage(__FUNCTION__ . ': ' . $s, KL_WARNING);
+            $sec = $now - $startTime;
+
+			$sender = $thread['Sender'];
+            $scriptID = $thread['ScriptID'];
+            if ($scriptID > 0) {
+                $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
+                $s = $this->TranslateFormat('script "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
+                $m = 'thread=' . $threadId . ', script=' . $ident . ', sender=' . $sender . ', duration=' . $duration;
+            } else {
+                $ident = $thread['FilePath'];
+                $s = $this->TranslateFormat('function "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
+                $m = 'thread=' . $threadId . ', function=' . $ident . ', sender=' . $sender . ', duration=' . $duration;
             }
-            $this->SendDebug(__FUNCTION__, $s, 0);
+
+            $threadId = $thread['ThreadID'];
+
+            if ($sec >= $thread_limit_error) {
+                $threadError++;
+                if ($checkResult != false) {
+                    $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
+                }
+                $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_ERROR);
+            } elseif ($sec >= $thread_limit_warn) {
+                $threadWarn++;
+                if ($checkResult != false) {
+                    $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_WARN);
+                }
+                $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_WARNING);
+            } elseif ($sec >= $thread_limit_info) {
+                $threadInfo++;
+                if ($checkResult != false) {
+                    $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_INFO);
+                }
+            }
+            $this->SendDebug(__FUNCTION__, $m, 0);
+        }
+
+        if ($checkResult != false) {
+            $counterList = $checkResult['counterList'];
+            $counterList['threads'] = [
+                'total' => count($threadList),
+                'used'  => $threadUsed,
+                'info'  => $threadInfo,
+                'warn'  => $threadWarn,
+                'error' => $threadError,
+            ];
+            $checkResult['counterList'] = $counterList;
+
+            $checkResult['messageList'] = $messageList;
+
+            $errorCount = 0;
+            $warnCount = 0;
+            $infoCount = 0;
+            foreach ($messageList as $tag => $entries) {
+                foreach ($entries as $err) {
+                    $lvl = $err['Level'];
+                    switch ($lvl) {
+                        case self::$LEVEL_INFO:
+                            $infoCount++;
+                            break;
+                        case self::$LEVEL_WARN:
+                            $warnCount++;
+                            break;
+                        case self::$LEVEL_ERROR:
+                        default:
+                            $errorCount++;
+                            break;
+                    }
+                }
+            }
+            $checkResult['errorCount'] = $errorCount;
+            $checkResult['warnCount'] = $warnCount;
+            $checkResult['infoCount'] = $infoCount;
+
+            if (json_encode($checkResult) != $old_CheckResult) {
+                $checkResult['timestamp'] = $now;
+
+                $html = $this->BuildOverview($checkResult);
+                $this->SetValue('Overview', $html);
+
+                $this->SetValue('CheckResult', json_encode($checkResult));
+
+                $this->SetValue('ErrorCount', $errorCount);
+                $this->SetValue('WarnCount', $warnCount);
+                $this->SetValue('InfoCount', $infoCount);
+
+                $this->SetValue('LastUpdate', $now);
+            }
         }
     }
 }

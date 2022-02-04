@@ -110,9 +110,9 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 |                                                   |         |              | |
 | Prüfung durchführen ...                           | integer | 60           | Durchführungsintervall, Angabe in Minuten |
 |                                                   |         |              | |
-| Threads-Infogrenze                                | integer | 10           | Laufzeit in Sekunden zur Information |
-| Threads-Warngrenze                                | integer | 30           | Laufzeit in Sekunden zur Warnung |
-| Threads-Fehlergrenze                              | integer | 120          | Laufzeit in Sekunden zur Fehlermeldung |
+| Threads-Infogrenze                                | integer | 10           | Grenzwert der Laufzeit in Sekunden (Information) |
+| Threads-Warngrenze                                | integer | 30           | Grenzwert der Laufzeit in Sekunden (Warnung) |
+| Threads-Fehlergrenze                              | integer | 120          | Grenzwert der Laufzeit in Sekunden (Fehlermeldung) |
 |                                                   |         |              | |
 
 - *... Zahlen*
@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.1 @ 03.02.2022 15:47 (beta)
+- 1.6.1 @ 04.02.2022 12:09
   - Threads überwachen (Langläufer)
 
 - 1.6 @ 20.01.2022 11:57

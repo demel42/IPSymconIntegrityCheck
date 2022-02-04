@@ -27,6 +27,8 @@
 			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
 			"Script called after test execution": "Skript, das nach Testdurchführung aufgerufen wird",
 
+			"The following points of the configuration are incorrect": "Die folgenden Punkte der Konfiguration sind fehlerhaft",
+
 			"Overview": "Übersicht",
 			"Start time": "Startzeitpunkt",
 			"Count of errors": "Anzahl der Fehler",
@@ -53,7 +55,8 @@
 			"user profile \"{$variableCustomProfile}\" has wrong type": "Benutzerprofil \"{$variableCustomProfile}\" hat falschen Typ",
 			"default action with ID {$variableAction} doesn't exists": "Standardaktion mit ID {$variableAction} existiert nicht",
 			"user action with ID {$variableAction} doesn't exists": "Benutzeraktion mit ID {$variableAction} existiert nicht",
-			"script with ID {$scriptID} is running since {$duration}": "Skript mit ID {$scriptID} läuft seit {$duration}",
+			"script \"{$ident}\" is running since {$duration}": "Skript \"{$ident}\" hat läuft seit {$duration}",
+			"function \"{$ident}\" is running since {$duration}": "Funktion \"{$ident}\" hat läuft seit {$duration}",
 			"is not yet saved": "ist noch nicht gespeichert",
 			"is unused": "wird nicht verwendet",
 
@@ -86,7 +89,8 @@
 			"Instance is active": "Instanz ist aktiv",
 			"Instance is deleted": "Instanz wird gelöscht",
 			"Instance is inactive": "Instanz ist inaktiv",
-			"Instance is not created": "Instanz wurde nicht erzeugt"
+			"Instance is not created": "Instanz wurde nicht erzeugt",
+			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)"
 		}
 	}
 }
