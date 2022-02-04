@@ -1289,6 +1289,7 @@ class IntegrityCheck extends IPSModule
             $sec = $now - $startTime;
 
 			$sender = $thread['Sender'];
+            $threadId = $thread['ThreadID'];
             $scriptID = $thread['ScriptID'];
             if ($scriptID > 0) {
                 $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
@@ -1299,8 +1300,6 @@ class IntegrityCheck extends IPSModule
                 $s = $this->TranslateFormat('function "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
                 $m = 'thread=' . $threadId . ', function=' . $ident . ', sender=' . $sender . ', duration=' . $duration;
             }
-
-            $threadId = $thread['ThreadID'];
 
             if ($sec >= $thread_limit_error) {
                 $threadError++;

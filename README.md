@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.1 @ 04.02.2022 12:09
+- 1.6.1 @ 04.02.2022 14:21 (beta)
   - Threads überwachen (Langläufer)
 
 - 1.6 @ 20.01.2022 11:57
