@@ -32,6 +32,7 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('post_script', 0);
 
         $this->RegisterPropertyInteger('monitor_interval', 60);
+        $this->RegisterPropertyBoolean('monitor_with_logging', true);
         $this->RegisterPropertyInteger('thread_limit_info', 10);
         $this->RegisterPropertyInteger('thread_limit_warn', 30);
         $this->RegisterPropertyInteger('thread_limit_error', 120);
@@ -46,6 +47,13 @@ class IntegrityCheck extends IPSModule
     {
         $s = '';
         $r = [];
+
+        $monitor_interval = $this->ReadPropertyInteger('monitor_interval');
+        $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
+        $monitor_with_logging = $this->ReadPropertyBoolean('monitor_with_logging');
+        if ($monitor_interval > 0 && $save_checkResult == false && $monitor_with_logging == false) {
+            $r[] = $this->Translate('Thread monitoring is useless without saving results or notification');
+        }
 
         if ($r != []) {
             $s = $this->Translate('The following points of the configuration are incorrect') . ':' . PHP_EOL;
@@ -272,7 +280,12 @@ class IntegrityCheck extends IPSModule
                     'type'    => 'IntervalBox',
                     'name'    => 'monitor_interval',
                     'caption' => 'Seconds'
-                ]
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'monitor_with_logging',
+                    'caption' => 'Notify about long-running threads'
+                ],
             ],
         ];
 
@@ -1238,6 +1251,7 @@ class IntegrityCheck extends IPSModule
         $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
         $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
         $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+        $monitor_with_logging = $this->ReadPropertyBoolean('monitor_with_logging');
 
         $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
         if ($save_checkResult) {
@@ -1288,7 +1302,7 @@ class IntegrityCheck extends IPSModule
             }
             $sec = $now - $startTime;
 
-			$sender = $thread['Sender'];
+            $sender = $thread['Sender'];
             $threadId = $thread['ThreadID'];
             $scriptID = $thread['ScriptID'];
             if ($scriptID > 0) {
@@ -1306,13 +1320,17 @@ class IntegrityCheck extends IPSModule
                 if ($checkResult != false) {
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
                 }
-                $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_ERROR);
+                if ($monitor_with_logging) {
+                    $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_ERROR);
+                }
             } elseif ($sec >= $thread_limit_warn) {
                 $threadWarn++;
                 if ($checkResult != false) {
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_WARN);
                 }
-                $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_WARNING);
+                if ($monitor_with_logging) {
+                    $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_WARNING);
+                }
             } elseif ($sec >= $thread_limit_info) {
                 $threadInfo++;
                 if ($checkResult != false) {
@@ -1332,7 +1350,6 @@ class IntegrityCheck extends IPSModule
                 'error' => $threadError,
             ];
             $checkResult['counterList'] = $counterList;
-
             $checkResult['messageList'] = $messageList;
 
             $errorCount = 0;

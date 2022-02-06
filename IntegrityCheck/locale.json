@@ -27,6 +27,9 @@
 			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
 			"Script called after test execution": "Skript, das nach Testdurchführung aufgerufen wird",
 
+			"Notify about long-running threads": "Über lang laufende Threads benachrichtigen",
+
+			"Thread monitoring is useless without saving results or notification": "Thread-Überwachung ist ohne Speicherung der Ergebnisse oder Benachrichtigung nutzlos",
 			"The following points of the configuration are incorrect": "Die folgenden Punkte der Konfiguration sind fehlerhaft",
 
 			"Overview": "Übersicht",
