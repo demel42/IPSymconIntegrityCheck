@@ -66,6 +66,14 @@ trait IntegrityCheckCommonLib
         return $ret;
     }
 
+    private function bool2str($bval)
+    {
+        if (is_bool($bval)) {
+            return $bval ? 'true' : 'false';
+        }
+        return $bval;
+    }
+
     public function GetConfigurationForm()
     {
         $formElements = $this->GetFormElements();

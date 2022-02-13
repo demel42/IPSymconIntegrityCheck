@@ -34,8 +34,9 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('monitor_interval', 60);
         $this->RegisterPropertyBoolean('monitor_with_logging', true);
         $this->RegisterPropertyInteger('thread_limit_info', 10);
-        $this->RegisterPropertyInteger('thread_limit_warn', 30);
-        $this->RegisterPropertyInteger('thread_limit_error', 120);
+        $this->RegisterPropertyInteger('thread_limit_warn', 60);
+        $this->RegisterPropertyInteger('thread_limit_error', 300);
+        $this->RegisterPropertyInteger('thread_warn_usage', 10);
 
         $this->RegisterTimer('PerformCheck', 0, 'IntegrityCheck_PerformCheck(' . $this->InstanceID . ');');
         $this->RegisterTimer('MonitorThreads', 0, 'IntegrityCheck_MonitorThreads(' . $this->InstanceID . ');');
@@ -53,6 +54,13 @@ class IntegrityCheck extends IPSModule
         $monitor_with_logging = $this->ReadPropertyBoolean('monitor_with_logging');
         if ($monitor_interval > 0 && $save_checkResult == false && $monitor_with_logging == false) {
             $r[] = $this->Translate('Thread monitoring is useless without saving results or notification');
+        }
+
+        $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
+        $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
+        $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+        if ($thread_limit_info > $thread_limit_warn || $thread_limit_warn > $thread_limit_error) {
+            $r[] = $this->Translate('Runtime limit must be ascending');
         }
 
         if ($r != []) {
@@ -151,7 +159,7 @@ class IntegrityCheck extends IPSModule
             'caption' => 'Perform check every X minutes'
         ];
         $items[] = [
-            'type'    => 'IntervalBox',
+            'type'    => 'NumberSpinner',
             'name'    => 'update_interval',
             'caption' => 'Minutes'
         ];
@@ -252,22 +260,40 @@ class IntegrityCheck extends IPSModule
             'items'   => [
                 [
                     'type'     => 'Label',
-                    'caption'  => 'Duration limit',
+                    'caption'  => 'Runtime limit',
                 ],
                 [
-                    'type'    => 'IntervalBox',
+                    'type'    => 'NumberSpinner',
+                    'suffix'  => 's',
                     'name'    => 'thread_limit_info',
-                    'caption' => 'Information'
+                    'caption' => 'Information',
+                    'width'   => '200px',
                 ],
                 [
-                    'type'    => 'IntervalBox',
-                    'name'    => 'thread_limit_warn',
-                    'caption' => 'Warning'
+                    'type'    => 'RowLayout',
+                    'items'   => [
+                        [
+                            'type'    => 'NumberSpinner',
+                            'suffix'  => 's',
+                            'name'    => 'thread_limit_warn',
+                            'caption' => 'Warning',
+                            'width'   => '200px',
+                        ],
+                        [
+                            'type'    => 'NumberSpinner',
+                            'suffix'  => '%',
+                            'name'    => 'thread_warn_usage',
+                            'caption' => 'Only when utilisation above',
+                            'width'   => '200px',
+                        ],
+                    ],
                 ],
                 [
-                    'type'    => 'IntervalBox',
+                    'type'    => 'NumberSpinner',
+                    'suffix'  => 's',
                     'name'    => 'thread_limit_error',
-                    'caption' => 'Error'
+                    'caption' => 'Error',
+                    'width'   => '200px',
                 ],
                 [
                     'type'    => 'Label',
@@ -277,7 +303,7 @@ class IntegrityCheck extends IPSModule
                     'caption' => 'Perform check every X seconds'
                 ],
                 [
-                    'type'    => 'IntervalBox',
+                    'type'    => 'NumberSpinner',
                     'name'    => 'monitor_interval',
                     'caption' => 'Seconds'
                 ],
@@ -1026,13 +1052,32 @@ class IntegrityCheck extends IPSModule
         $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
         $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
         $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+        $thread_warn_usage = $this->ReadPropertyInteger('thread_warn_usage');
 
         // Threads
         $threadList = IPS_GetScriptThreadList();
+        $threadMaxCount = IPS_GetOption('ThreadCount');
         $threadUsed = 0;
         $threadInfo = 0;
         $threadWarn = 0;
         $threadError = 0;
+        foreach ($threadList as $t => $i) {
+            $thread = IPS_GetScriptThread($i);
+            if ($thread['StartTime'] == 0) {
+                continue;
+            }
+            $threadUsed++;
+        }
+
+        $doWarn = true;
+        if ($thread_warn_usage > 0) {
+            $u = $threadMaxCount / 100 * $thread_warn_usage;
+            if ($threadUsed < $u) {
+                $doWarn = false;
+            }
+            $this->SendDebug(__FUNCTION__, 'threads max=' . $threadMaxCount . ', used=' . $threadUsed . ', usage-limit=' . $u . ' => doWarn=' . $this->bool2str($doWarn), 0);
+        }
+
         foreach ($threadList as $t => $i) {
             $thread = IPS_GetScriptThread($i);
             // $this->SendDebug(__FUNCTION__, 'thread=' . print_r($thread, true) . ', t=' . print_r($t, true) . ', i=' . $i, 0);
@@ -1041,8 +1086,6 @@ class IntegrityCheck extends IPSModule
             if ($startTime == 0) {
                 continue;
             }
-
-            $threadUsed++;
 
             $sec = $now - $startTime;
             $duration = '';
@@ -1072,7 +1115,7 @@ class IntegrityCheck extends IPSModule
             if ($sec >= $thread_limit_error) {
                 $threadError++;
                 $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
-            } elseif ($sec >= $thread_limit_warn) {
+            } elseif ($doWarn && $sec >= $thread_limit_warn) {
                 $threadWarn++;
                 $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_WARN);
             } elseif ($sec >= $thread_limit_info) {
@@ -1251,6 +1294,7 @@ class IntegrityCheck extends IPSModule
         $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
         $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
         $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+        $thread_warn_usage = $this->ReadPropertyInteger('thread_warn_usage');
         $monitor_with_logging = $this->ReadPropertyBoolean('monitor_with_logging');
 
         $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
@@ -1270,10 +1314,28 @@ class IntegrityCheck extends IPSModule
         }
 
         $threadList = IPS_GetScriptThreadList();
+        $threadMaxCount = IPS_GetOption('ThreadCount');
         $threadUsed = 0;
         $threadInfo = 0;
         $threadWarn = 0;
         $threadError = 0;
+        foreach ($threadList as $t => $i) {
+            $thread = IPS_GetScriptThread($i);
+            if ($thread['StartTime'] == 0) {
+                continue;
+            }
+            $threadUsed++;
+        }
+
+        $doWarn = true;
+        if ($thread_warn_usage > 0) {
+            $u = $threadMaxCount / 100 * $thread_warn_usage;
+            if ($threadUsed < $u) {
+                $doWarn = false;
+            }
+            $this->SendDebug(__FUNCTION__, 'threads max=' . $threadMaxCount . ', used=' . $threadUsed . ', usage-limit=' . $u . ' => doWarn=' . $this->bool2str($doWarn), 0);
+        }
+
         foreach ($threadList as $t => $i) {
             $thread = IPS_GetScriptThread($i);
 
@@ -1283,8 +1345,6 @@ class IntegrityCheck extends IPSModule
             }
 
             $this->SendDebug(__FUNCTION__, 'thread #' . $i . '=' . print_r($thread, true), 0);
-
-            $threadUsed++;
 
             $sec = $now - $startTime;
             $duration = '';
@@ -1323,7 +1383,7 @@ class IntegrityCheck extends IPSModule
                 if ($monitor_with_logging) {
                     $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_ERROR);
                 }
-            } elseif ($sec >= $thread_limit_warn) {
+            } elseif ($doWarn && $sec >= $thread_limit_warn) {
                 $threadWarn++;
                 if ($checkResult != false) {
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_WARN);

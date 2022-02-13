@@ -135,7 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.2 @ 06.02.2022 14:08 (beta)
+- 1.6.3 @ 13.02.2022 12:06 (beta)
+  - Thread-Monitoring: nur Warnung nur ab einer bestimmten AUsnutzung des Thread-Pools
+
+- 1.6.2 @ 06.02.2022 14:08
   - Thread-Monitoring: nur optional benachrichtigen
 
 - 1.6.1 @ 06.02.2022 14:08
