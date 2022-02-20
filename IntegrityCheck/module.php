@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
+require_once __DIR__ . '/../libs/CommonStubs/common.php'; // globale Funktionen
 require_once __DIR__ . '/../libs/local.php';   // lokale Funktionen
 
 class IntegrityCheck extends IPSModule
 {
-    use IntegrityCheckCommonLib;
+    use StubsCommonLib;
     use IntegrityCheckLocalLib;
 
     public function InstallVarProfiles(bool $reInstall = false)
@@ -328,16 +328,7 @@ class IntegrityCheck extends IPSModule
             'onClick' => 'IntegrityCheck_PerformCheck($id);'
         ];
 
-        $formActions[] = [
-            'type'    => 'ExpansionPanel',
-            'caption' => 'Information',
-            'items'   => [
-                [
-                    'type'    => 'Label',
-                    'caption' => $this->InstanceInfo($this->InstanceID),
-                ],
-            ],
-        ];
+        $formActions[] = $this->GetInformationForm();
 
         return $formActions;
     }

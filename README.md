@@ -136,8 +136,9 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.6.4 @ 20.02.2022 12:06
-  - Anpassungen an IPS 6.1 (Prüfung auf ungültige ID's)
   - Überprüfung der Aktions-Scripte von Ereignissen auf ungültige Objekt-ID's
+  - Anpassungen an IPS 6.1 (Prüfung auf ungültige ID's)
+  - libs/common.php -> submodule CommonStubs
 
 - 1.6.3 @ 13.02.2022 12:06
   - Thread-Monitoring: nur Warnung nur ab einer bestimmten AUsnutzung des Thread-Pools
