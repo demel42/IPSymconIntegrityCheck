@@ -97,7 +97,7 @@ class IntegrityCheck extends IPSModule
         $propertyNames = ['ignore_category', 'post_script'];
         foreach ($propertyNames as $name) {
             $oid = $this->ReadPropertyInteger($name);
-            if ($oid > 0) {
+            if ($oid >= 10000) {
                 $this->RegisterReference($oid);
             }
         }
@@ -107,7 +107,7 @@ class IntegrityCheck extends IPSModule
         if ($ignore_objects != false) {
             foreach ($objectList as $obj) {
                 $oid = $obj['ObjectID'];
-                if ($oid > 0) {
+                if ($oid >= 10000) {
                     $this->RegisterReference($oid);
                 }
             }
@@ -465,7 +465,7 @@ class IntegrityCheck extends IPSModule
                     }
                 $html .= '<span style="color: ' . $col . ';">&nbsp;&nbsp;&nbsp;';
                 $id = $entry['ID'];
-                if ($id != 0) {
+                if ($id >= 10000) {
                     $html .= '#' . $id;
                     $loc = @IPS_GetLocation($id);
                     if ($loc != false) {
@@ -503,14 +503,14 @@ class IntegrityCheck extends IPSModule
         if ($objectList != false) {
             foreach ($objectList as $obj) {
                 $oid = $obj['ObjectID'];
-                if ($oid > 0) {
+                if ($oid >= 10000) {
                     $ignoreObjects[] = $oid;
                 }
             }
         }
 
         $ignore_category = $this->ReadPropertyInteger('ignore_category');
-        if ($ignore_category > 0) {
+        if ($ignore_category >= 10000) {
             $this->GetAllChildenIDs($ignore_category, $ignoreObjects);
         }
 
@@ -523,7 +523,7 @@ class IntegrityCheck extends IPSModule
         if ($numList != false) {
             foreach ($numList as $num) {
                 $id = $num['ID'];
-                if ($id > 0) {
+                if ($id >= 10000) {
                     $ignoreNums[] = $id;
                 }
             }
@@ -543,7 +543,7 @@ class IntegrityCheck extends IPSModule
             }
             $object = IPS_GetObject($objectID);
             $parentID = $object['ParentID'];
-            if ($parentID != 0 && IPS_ObjectExists($parentID) == false) {
+            if ($parentID >= 10000 && IPS_ObjectExists($parentID) == false) {
                 $s = $this->TranslateFormat('parent object with ID {$parentID} doesn\'t exists', ['{$parentID}' => $parentID]);
                 $this->AddMessageEntry($messageList, 'objects', $objectID, $s, self::$LEVEL_ERROR);
             }
@@ -840,7 +840,7 @@ class IntegrityCheck extends IPSModule
                         if (isset($action['parameters']['VARIABLE'])) {
                             $varID = intval($action['parameters']['VARIABLE']);
                             $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-ids - varID=' . $varID, 0);
-                            if ($varID != 0 && IPS_VariableExists($varID) == false) {
+                            if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                                 $s = $this->TranslateFormat('flow/variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
                                 $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                             }
@@ -870,7 +870,7 @@ class IntegrityCheck extends IPSModule
             }
             $err = 0;
             $varID = $event['TriggerVariableID'];
-            if ($varID != 0 && IPS_VariableExists($varID) == false) {
+            if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                 $s = $this->TranslateFormat('triggering variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
                 $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
             }
@@ -879,8 +879,22 @@ class IntegrityCheck extends IPSModule
                 $variableRules = $eventCondition['VariableRules'];
                 foreach ($variableRules as $variableRule) {
                     $varID = $variableRule['VariableID'];
-                    if ($varID != 0 && IPS_VariableExists($varID) == false) {
+                    if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                         $s = $this->TranslateFormat('condition variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
+                        $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                    }
+                }
+            }
+            $eventActionParameters = $event['EventActionParameters'];
+            if (isset($eventActionParameters['SCRIPT'])) {
+                $file = 'Event #' . $eventID;
+                $text = $eventActionParameters['SCRIPT'];
+                $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+                foreach ($ret as $r) {
+                    $id = $r['id'];
+                    $row = $r['row'];
+                    if ($id != false) {
+                        $s = $this->TranslateFormat('event action, row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
                         $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                     }
                 }
@@ -1104,7 +1118,7 @@ class IntegrityCheck extends IPSModule
             $sec = $now - $startTime;
 
             $scriptID = $thread['ScriptID'];
-            if ($scriptID > 0) {
+            if ($scriptID >= 10000) {
                 $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
                 $s = $this->TranslateFormat('script "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
             } else {
@@ -1194,7 +1208,7 @@ class IntegrityCheck extends IPSModule
         }
 
         $post_script = $this->ReadPropertyInteger('post_script');
-        if ($post_script > 0) {
+        if ($post_script >= 10000) {
             $ret = IPS_RunScriptEx($post_script, ['InstanceID' => $this->InstanceID, 'CheckResult' => json_encode($checkResult)]);
             $this->SendDebug(__FUNCTION__, 'call script ' . IPS_GetParent($post_script) . '\\' . IPS_GetName($post_script) . ', ret=' . $ret, 0);
         }
@@ -1365,7 +1379,7 @@ class IntegrityCheck extends IPSModule
             $sender = $thread['Sender'];
             $threadId = $thread['ThreadID'];
             $scriptID = $thread['ScriptID'];
-            if ($scriptID > 0) {
+            if ($scriptID >= 10000) {
                 $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
                 $s = $this->TranslateFormat('script "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
                 $m = 'thread=' . $threadId . ', script=' . $ident . ', sender=' . $sender . ', duration=' . $duration;

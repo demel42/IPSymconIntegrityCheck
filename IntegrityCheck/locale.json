@@ -52,6 +52,7 @@
 			"file \"{$file}\" is unused": "Datei \"{$file}\" ist ungenutzt",
 			"file \"{$file}\" is missing": "Datei \"{$file}\" fehlt",
 			"row {$row} - a object with ID {$id} doesn't exists": "Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
+			"event action, row {$row} - a object with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
 			"triggering variable {$varID} doesn't exists": "auslösende Variable {$varID} existiert nicht",
 			"condition variable {$varID} doesn't exists": "bedingende Variable {$varID} existiert nicht",
 			"default profile \"{$variableProfile}\" doesn't exists": "Standardprofil \"{$variableProfile}\" existiert nicht",
