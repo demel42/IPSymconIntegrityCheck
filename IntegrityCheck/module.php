@@ -361,7 +361,7 @@ class IntegrityCheck extends IPSModule
                 define('SCRIPTTYPE_FLOW', 1);
             }
             $scriptTypes[] = SCRIPTTYPE_FLOW;
-            $scriptTypeNames[] = 'flow-script';
+            $scriptTypeNames[] = 'flow-plan';
         }
 
         // HTML-Text aufbauen
@@ -475,6 +475,99 @@ class IntegrityCheck extends IPSModule
         $html .= '</body>' . PHP_EOL;
 
         return $html;
+    }
+
+    private function decodeAction($action, $steps, $lvl, $scriptID, $scriptTypeName, &$messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS)
+    {
+        $step = '';
+        for ($l = 0; $l <= $lvl; $l++) {
+            if ($step != '') {
+                $step .= '-';
+            }
+            $step .= strval($steps[$l]);
+        }
+        $this->SendDebug(__FUNCTION__, $scriptTypeName . '/script=' . IPS_GetName($scriptID) . '(' . $scriptID . '), step=' . $step . ', action=' . print_r($action, true), 0);
+
+        if (isset($action['parameters']['TARGET'])) {
+            $objID = intval($action['parameters']['TARGET']);
+            if ($objID != -1) {
+                if ($objID >= 10000 && IPS_ObjectExists($objID) == false) {
+                    $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - object ' . $objID . ' doesn\'t exists', 0);
+                    $s = $this->TranslateFormat('flow-plan step {$step} - target {$objID} doesn\'t exists', ['{$step}' => $step, '{$objID}' => $objID]);
+                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                }
+            }
+        }
+
+        if (isset($a['parameters']['VARIABLE'])) {
+            $varID = intval($a['parameters']['VARIABLE']);
+            if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - variable ' . $varID . ' doesn\'t exists', 0);
+                $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
+                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+            }
+        }
+
+        if (isset($action['parameters']['CONDITION'])) {
+            $conditions = json_decode($action['parameters']['CONDITION'], true);
+            if ($conditions != false) {
+                foreach ($conditions as $condition) {
+                    $vars = $condition['rules']['variable'];
+                    foreach ($vars as $var) {
+                        $varID = $var['variableID'];
+                        if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
+                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
+                            $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
+                            $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                        }
+                        if ($var['type'] == 1 /* compare with variable */) {
+                            $varID = $var['value'];
+                            if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
+                                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
+                                $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
+                                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (isset($action['parameters']['SCRIPT'])) {
+            $file = 'Action #' . $scriptID . '_' . $step;
+            $text = $action['parameters']['SCRIPT'];
+            $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+            foreach ($ret as $r) {
+                $row = $r['row'];
+                $id = $r['id'];
+                if ($id != false) {
+                    $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - a object with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                }
+            }
+            $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $scriptTypeName, $fileListINC, $fileListIPS);
+            foreach ($ret as $r) {
+                $row = $r['row'];
+                if (isset($r['file'])) {
+                    $file = $r['file'];
+                    $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - file "{$file}" is missing', ['{$step}' => $step, '{$row}' => $row, '{$file}' => $file]);
+                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                } else {
+                    $id = $r['id'];
+                    if ($id != false) {
+                        $s = $this->TranslateFormat('low-plan step {$step}, script row {$row} - script with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+                        $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                    }
+                }
+            }
+        }
+        if (isset($action['parameters']['ACTIONS'])) {
+            $lvl++;
+            $steps[$lvl] = 0;
+            foreach ($action['parameters']['ACTIONS'] as $a) {
+                $steps[$lvl]++;
+                $this->decodeAction($a, $steps, $lvl, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+            }
+        }
     }
 
     public function PerformCheck()
@@ -626,7 +719,7 @@ class IntegrityCheck extends IPSModule
                 define('SCRIPTTYPE_FLOW', 1);
             }
             $scriptTypes[] = SCRIPTTYPE_FLOW;
-            $scriptTypeNames[] = 'flow-script';
+            $scriptTypeNames[] = 'flow-plan';
         }
         foreach ($scriptTypes as $scriptType) {
             $fileListIPS = [];
@@ -689,46 +782,19 @@ class IntegrityCheck extends IPSModule
                     if (in_array($scriptID, $ignoreObjects)) {
                         continue;
                     }
-                    $lines = explode(PHP_EOL, $text);
-                    foreach ($lines as $line) {
-                        if (preg_match('/' . preg_quote($no_id_check, '/') . '/', $line)) {
-                            continue;
-                        }
-                        if (preg_match('/^[\t ]*(require_once|require|include_once|include)[\t ]*\([\t ]*(.*)[\t ]*\)[\t ]*;/', $line, $r)) {
-                            $a = $r[2];
-                        } elseif (preg_match('/^[\t ]*(require_once|require|include_once|include)[\t ]*(.*)[\t ]*;/', $line, $r)) {
-                            $a = $r[2];
-                        } else {
-                            continue;
-                        }
-                        if (preg_match('/^[\t ]*[\'"]([^\'"]*)[\'"][\t ]*$/', $a, $x)) {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#1 file=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
-                            $incFile = $x[1];
-                            if (!in_array($incFile, $fileListINC)) {
-                                $fileListINC[] = $incFile;
-                            }
-                            if (in_array($incFile, $fileListIPS)) {
-                                continue;
-                            }
-                            if (file_exists($path . '/' . $incFile)) {
-                                continue;
-                            }
-                            $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $incFile]);
+                    $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $scriptTypeName, $fileListINC, $fileListIPS);
+                    foreach ($ret as $r) {
+                        $row = $r['row'];
+                        if (isset($r['file'])) {
+                            $file = $r['file'];
+                            $s = $this->TranslateFormat('row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
                             $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
-                        } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
-                            $id = $x[1];
-                            $incFile = @IPS_GetScriptFile($id);
-                            if ($incFile == false) {
-                                $s = $this->TranslateFormat('script with ID {$id} doesn\'t exists', ['{$id}' => $id]);
-                                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
-                            } else {
-                                if (!in_array($incFile, $fileListINC)) {
-                                    $fileListINC[] = $incFile;
-                                }
-                            }
                         } else {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no match: file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                            $id = $r['id'];
+                            if ($id != false) {
+                                $s = $this->TranslateFormat('row {$row} - script with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                            }
                         }
                     }
                 }
@@ -741,11 +807,6 @@ class IntegrityCheck extends IPSModule
                 if (in_array($file, $fileListIPS) || in_array($file, $fileListINC)) {
                     continue;
                 }
-                /*
-                if (preg_match('/^.*\.inc\.php$/', $file)) {
-                    continue;
-                }
-                 */
                 $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
                 $this->AddMessageEntry($messageList, 'scripts', 0, $s, self::$LEVEL_INFO);
             }
@@ -785,8 +846,8 @@ class IntegrityCheck extends IPSModule
                     }
                     $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
                     foreach ($ret as $r) {
-                        $id = $r['id'];
                         $row = $r['row'];
+                        $id = $r['id'];
                         if ($id != false) {
                             $s = $this->TranslateFormat('row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
                             $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
@@ -809,35 +870,13 @@ class IntegrityCheck extends IPSModule
                     if (in_array($scriptID, $ignoreObjects)) {
                         continue;
                     }
-
-                    /*
                     $jtext = json_decode($text, true);
-                    $this->SendDebug(__FUNCTION__, 'flow-script - text=' . print_r($jtext, true), 0);
+
+                    $steps = [0];
                     foreach ($jtext['actions'] as $action) {
-                        $this->SendDebug(__FUNCTION__, 'flow-script - action=' . print_r($action, true), 0);
-                        if (isset($action['parameters']['SCRIPT'])) {
-                            $text = $action['parameters']['SCRIPT'];
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-ids - lines=' . print_r($lines, true), 0);
-                            $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
-                            foreach ($ret as $r) {
-                                $id = $r['id'];
-                                $row = $r['row'];
-                                if ($id != false) {
-                                    $s = $this->TranslateFormat('flow/script - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
-                                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
-                                }
-                            }
-                        }
-                        if (isset($action['parameters']['VARIABLE'])) {
-                            $varID = intval($action['parameters']['VARIABLE']);
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-ids - varID=' . $varID, 0);
-                            if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
-                                $s = $this->TranslateFormat('flow/variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
-                                $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
-                            }
-                        }
+                        $steps[0]++;
+                        $this->decodeAction($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
                     }
-                     */
                 }
             }
         }
@@ -882,11 +921,26 @@ class IntegrityCheck extends IPSModule
                 $text = $eventActionParameters['SCRIPT'];
                 $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
                 foreach ($ret as $r) {
-                    $id = $r['id'];
                     $row = $r['row'];
+                    $id = $r['id'];
                     if ($id != false) {
                         $s = $this->TranslateFormat('event action, row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
                         $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                    }
+                }
+                $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, 'php-script', $fileListINC, $fileListIPS);
+                foreach ($ret as $r) {
+                    $row = $r['row'];
+                    if (isset($r['file'])) {
+                        $file = $r['file'];
+                        $s = $this->TranslateFormat('event action, row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
+                        $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                    } else {
+                        $id = $r['id'];
+                        if ($id != false) {
+                            $s = $this->TranslateFormat('event action, row {$row} - script with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                            $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                        }
                     }
                 }
             }
@@ -1271,12 +1325,70 @@ class IntegrityCheck extends IPSModule
                         }
                         if ($fnd == false) {
                             $ret[] = [
-                                'id' => $id,
-                                'row'=> $row,
+                                'row' => $row,
+                                'id'  => $id,
                             ];
                         }
                     }
                 }
+            }
+        }
+        return $ret;
+    }
+
+    private function parseText4Includes($file, $text, $objectList, $ignoreNums, $scriptTypeName, $fileListINC, $fileListIPS)
+    {
+        $no_id_check = $this->ReadPropertyString('no_id_check');
+
+        $path = IPS_GetKernelDir() . 'scripts';
+
+        $ret = [];
+        $row = 0;
+        $lines = explode(PHP_EOL, $text);
+        foreach ($lines as $line) {
+            $row++;
+            if (preg_match('/' . preg_quote($no_id_check, '/') . '/', $line)) {
+                continue;
+            }
+            if (preg_match('/^[\t ]*(require_once|require|include_once|include)[\t ]*\([\t ]*(.*)[\t ]*\)[\t ]*;/', $line, $r)) {
+                $a = $r[2];
+            } elseif (preg_match('/^[\t ]*(require_once|require|include_once|include)[\t ]*(.*)[\t ]*;/', $line, $r)) {
+                $a = $r[2];
+            } else {
+                continue;
+            }
+            if (preg_match('/^[\t ]*[\'"]([^\'"]*)[\'"][\t ]*$/', $a, $x)) {
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#1 file=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                $incFile = $x[1];
+                if (!in_array($incFile, $fileListINC)) {
+                    $fileListINC[] = $incFile;
+                }
+                if (in_array($incFile, $fileListIPS)) {
+                    continue;
+                }
+                if (file_exists($path . '/' . $incFile)) {
+                    continue;
+                }
+                $r[] = [
+                    'row'  => $row,
+                    'file' => $incFile,
+                ];
+            } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                $id = $x[1];
+                $incFile = @IPS_GetScriptFile($id);
+                if ($incFile == false) {
+                    $r[] = [
+                        'row' => $row,
+                        'id'  => $id,
+                    ];
+                } else {
+                    if (!in_array($incFile, $fileListINC)) {
+                        $fileListINC[] = $incFile;
+                    }
+                }
+            } else {
+                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no match: file=' . $file . ', line=' . $this->LimitOutput($line), 0);
             }
         }
         return $ret;

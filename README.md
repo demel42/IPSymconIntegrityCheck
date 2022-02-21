@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.6.5 @ 21.02.2022 15:37
+  - Überprüfung von Ablaufplänen
+    Es werden überprüft: die referenzierten Variablen, Ziele, eingebettete Skripte sowie die Bedingungen
+
 - 1.6.4 @ 20.02.2022 18:15
   - Überprüfung der Aktions-Scripte von Ereignissen auf ungültige Objekt-ID's
   - Anpassungen an IPS 6.1 (Prüfung auf ungültige ID's)
