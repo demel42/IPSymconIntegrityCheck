@@ -135,13 +135,16 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.6.5 @ 25.02.2022 20:34 (beta)
+  - Fix
+
 - 1.6.5 @ 21.02.2022 15:37
   - Überprüfung von Ablaufplänen
     Es werden überprüft: die referenzierten Variablen, Ziele, eingebettete Skripte sowie die Bedingungen
 
 - 1.6.4 @ 20.02.2022 18:15
   - Überprüfung der Aktions-Scripte von Ereignissen auf ungültige Objekt-ID's
-  - Anpassungen an IPS 6.1 (Prüfung auf ungültige ID's)
+  - Anpassungen an IPS 6.2 (Prüfung auf ungültige ID's)
   - libs/common.php -> submodule CommonStubs
 
 - 1.6.3 @ 13.02.2022 12:06
