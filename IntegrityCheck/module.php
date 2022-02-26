@@ -515,13 +515,13 @@ class IntegrityCheck extends IPSModule
                     $vars = $condition['rules']['variable'];
                     foreach ($vars as $var) {
                         $this->SendDebug(__FUNCTION__, $scriptTypeName . '/var=' . print_r($var, true), 0);
-                        $varID = $var['variableID'];
+                        $varID = $this->GetArrayElem($var, 'variableID', 0);
                         if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                             $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
                             $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                             $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                         }
-                        if (isset($var['type']) && $var['type'] == 1 /* compare with variable */) {
+                        if ($this->GetArrayElem($var, 'type', 0) == 1 /* compare with variable */) {
                             $varID = $var['value'];
                             if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                                 $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
