@@ -32,7 +32,7 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 - es werden include/include_once/require/require_once-Anweisungen überprüft, ob die referenzierten Datein vorhanden sind
 - es wird versucht, im PHP-Code vorhandene ID's zu erkennen und diese zu überprüfen
 ##### Ablaufplan:
-- *noch keine Prüfung*
+- es werden die referenzierten Variablen, Ziele, eingebettete Skripte sowie die Bedingungen überprüft
 #### Ereignisse
 - _TriggerVariableID_ auf Gültigkeit
 - _EventConditions.VariableID_ auf Gültigkeit
@@ -50,7 +50,7 @@ Prüfung der internen Integrität des IP-Symcon-Installation, überprüft werden
 #### Timer
 - Anzahl der aktiven Timer
 #### Threads
-- Anzahl der genutzten Threads
+- Anzahl der genutzten Threads, Prüfung auf Langläufer
 
 Die Auffälligkeiten werden detailliert ausgegeben und je nach Schwere als _Error_, _Warning_ oder _Information_ gekennzeichnet.
 
@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.5 @ 25.02.2022 20:34 (beta)
+- 1.6.5 @ 26.02.2022 12:19 (beta)
   - Fix
 
 - 1.6.5 @ 21.02.2022 15:37
