@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.6 @ 01.03.2022 11:18 (beta)
+- 1.6.6 @ 01.03.2022 21:55 (beta)
   - Anzeige der Referenzen der Instanz
 
 - 1.6.5 @ 26.02.2022 12:19

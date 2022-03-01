@@ -334,6 +334,18 @@ class IntegrityCheck extends IPSModule
         return $formActions;
     }
 
+    public function RequestAction($Ident, $Value)
+    {
+        if ($this->CommonRequestAction($Ident, $Value)) {
+            return;
+        }
+        switch ($Ident) {
+            default:
+                $this->SendDebug(__FUNCTION__, 'invalid ident ' . $Ident, 0);
+                break;
+        }
+    }
+
     protected function SetUpdateInterval()
     {
         $min = $this->ReadPropertyInteger('update_interval');
