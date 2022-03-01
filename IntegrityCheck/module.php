@@ -197,7 +197,7 @@ class IntegrityCheck extends IPSModule
                             'caption'  => 'objects',
                             'name'     => 'ObjectID',
                             'width'    => '400px',
-                            'add'      => '',
+                            'add'      => -1,
                             'edit'     => [
                                 'type'    => 'SelectObject',
                                 'caption' => 'Target'
@@ -329,6 +329,7 @@ class IntegrityCheck extends IPSModule
         ];
 
         $formActions[] = $this->GetInformationForm();
+        $formActions[] = $this->GetReferencesForm();
 
         return $formActions;
     }
@@ -355,13 +356,13 @@ class IntegrityCheck extends IPSModule
         $messageList = $checkResult['messageList'];
 
         $scriptTypes = [SCRIPTTYPE_PHP];
-        $scriptTypeNames = ['php-script'];
+        $scriptTypeNames = ['php script'];
         if (IPS_GetKernelVersion() >= 6) {
             if (!defined('SCRIPTTYPE_FLOW')) {
                 define('SCRIPTTYPE_FLOW', 1);
             }
             $scriptTypes[] = SCRIPTTYPE_FLOW;
-            $scriptTypeNames[] = 'flow-plan';
+            $scriptTypeNames[] = 'flow plan';
         }
 
         // HTML-Text aufbauen
@@ -493,7 +494,7 @@ class IntegrityCheck extends IPSModule
             if ($objID != -1) {
                 if ($objID >= 10000 && IPS_ObjectExists($objID) == false) {
                     $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - object ' . $objID . ' doesn\'t exists', 0);
-                    $s = $this->TranslateFormat('flow-plan step {$step} - target {$objID} doesn\'t exists', ['{$step}' => $step, '{$objID}' => $objID]);
+                    $s = $this->TranslateFormat('flow plan step {$step} - target {$objID} doesn\'t exists', ['{$step}' => $step, '{$objID}' => $objID]);
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
@@ -503,7 +504,7 @@ class IntegrityCheck extends IPSModule
             $varID = intval($a['parameters']['VARIABLE']);
             if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                 $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - variable ' . $varID . ' doesn\'t exists', 0);
-                $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
+                $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                 $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
             }
         }
@@ -518,14 +519,14 @@ class IntegrityCheck extends IPSModule
                         $varID = $this->GetArrayElem($var, 'variableID', 0);
                         if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                             $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
-                            $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
+                            $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                             $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                         }
                         if ($this->GetArrayElem($var, 'type', 0) == 1 /* compare with variable */) {
                             $varID = $var['value'];
                             if ($varID >= 10000 && IPS_VariableExists($varID) == false) {
                                 $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
-                                $s = $this->TranslateFormat('flow-plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
+                                $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                                 $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                             }
                         }
@@ -541,7 +542,7 @@ class IntegrityCheck extends IPSModule
                 $row = $r['row'];
                 $id = $r['id'];
                 if ($id != false) {
-                    $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - a object with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+                    $s = $this->TranslateFormat('flow plan step {$step}, script row {$row} - a object with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
@@ -550,7 +551,7 @@ class IntegrityCheck extends IPSModule
                 $row = $r['row'];
                 if (isset($r['file'])) {
                     $file = $r['file'];
-                    $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - file "{$file}" is missing', ['{$step}' => $step, '{$row}' => $row, '{$file}' => $file]);
+                    $s = $this->TranslateFormat('flow plan step {$step}, script row {$row} - file "{$file}" is missing', ['{$step}' => $step, '{$row}' => $row, '{$file}' => $file]);
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 } else {
                     $id = $r['id'];
@@ -714,13 +715,13 @@ class IntegrityCheck extends IPSModule
         $scriptList = IPS_GetScriptList();
         $scriptTypeCount = [];
         $scriptTypes = [SCRIPTTYPE_PHP];
-        $scriptTypeNames = ['php-script'];
+        $scriptTypeNames = ['php script'];
         if (IPS_GetKernelVersion() >= 6) {
             if (!defined('SCRIPTTYPE_FLOW')) {
                 define('SCRIPTTYPE_FLOW', 1);
             }
             $scriptTypes[] = SCRIPTTYPE_FLOW;
-            $scriptTypeNames[] = 'flow-plan';
+            $scriptTypeNames[] = 'flow plan';
         }
         foreach ($scriptTypes as $scriptType) {
             $fileListIPS = [];
@@ -929,7 +930,7 @@ class IntegrityCheck extends IPSModule
                         $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                     }
                 }
-                $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, 'php-script', $fileListINC, $fileListIPS);
+                $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, 'php script', $fileListINC, $fileListIPS);
                 foreach ($ret as $r) {
                     $row = $r['row'];
                     if (isset($r['file'])) {
