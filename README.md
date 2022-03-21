@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.7 @ 03.03.2022 15:30 (beta)
+- 1.6.7 @ 21.03.2022 17:05
   - Fix in CommonStub
   - Anzeige referenzierten Statusvariablen
 
