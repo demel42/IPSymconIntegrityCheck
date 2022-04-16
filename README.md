@@ -135,8 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.8 @ 13.04.2022 15:26
+- 1.6.8 @ 16.04.2022 11:57
   - potentieller Namenskonflikt behoben (trait CommonStubs)
+  - Aktualisierung von submodule CommonStubs
 
 - 1.6.7 @ 21.03.2022 17:05
   - Fix in CommonStub
