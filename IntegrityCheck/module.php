@@ -10,13 +10,6 @@ class IntegrityCheck extends IPSModule
     use IntegrityCheck\StubsCommonLib;
     use IntegrityCheckLocalLib;
 
-    public function InstallVarProfiles(bool $reInstall = false)
-    {
-        if ($reInstall) {
-            $this->SendDebug(__FUNCTION__, 'reInstall=' . $this->bool2str($reInstall), 0);
-        }
-    }
-
     public function Create()
     {
         parent::Create();
@@ -38,15 +31,16 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('thread_limit_error', 300);
         $this->RegisterPropertyInteger('thread_warn_usage', 10);
 
-        $this->RegisterTimer('PerformCheck', 0, 'IntegrityCheck_PerformCheck(' . $this->InstanceID . ');');
-        $this->RegisterTimer('MonitorThreads', 0, 'IntegrityCheck_MonitorThreads(' . $this->InstanceID . ');');
+        $this->RegisterAttributeString('UpdateInfo', '');
+
+        $this->RegisterTimer('PerformCheck', 0, $this->GetModulePrefix() . '_PerformCheck(' . $this->InstanceID . ');');
+        $this->RegisterTimer('MonitorThreads', 0, $this->GetModulePrefix() . '_MonitorThreads(' . $this->InstanceID . ');');
 
         $this->InstallVarProfiles(false);
     }
 
-    private function CheckConfiguration()
+    private function CheckModuleConfiguration()
     {
-        $s = '';
         $r = [];
 
         $monitor_interval = $this->ReadPropertyInteger('monitor_interval');
@@ -63,44 +57,15 @@ class IntegrityCheck extends IPSModule
             $r[] = $this->Translate('Runtime limit must be ascending');
         }
 
-        if ($r != []) {
-            $s = $this->Translate('The following points of the configuration are incorrect') . ':' . PHP_EOL;
-            foreach ($r as $p) {
-                $s .= '- ' . $p . PHP_EOL;
-            }
-        }
-
-        return $s;
+        return $r;
     }
 
     public function ApplyChanges()
     {
-        $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
-
         parent::ApplyChanges();
 
-        $vpos = 0;
-
-        $this->MaintainVariable('Overview', $this->Translate('Overview'), VARIABLETYPE_STRING, '~HTMLBox', $vpos++, true);
-        $this->MaintainVariable('StartTime', $this->Translate('Start time'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
-        $this->MaintainVariable('ErrorCount', $this->Translate('Count of errors'), VARIABLETYPE_INTEGER, '', $vpos++, true);
-        $this->MaintainVariable('WarnCount', $this->Translate('Count of warnings'), VARIABLETYPE_INTEGER, '', $vpos++, true);
-        $this->MaintainVariable('InfoCount', $this->Translate('Count of informations'), VARIABLETYPE_INTEGER, '', $vpos++, true);
-        $this->MaintainVariable('LastUpdate', $this->Translate('Last update'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
-
-        $this->MaintainVariable('CheckResult', $this->Translate('Check result'), VARIABLETYPE_STRING, '', $vpos++, $save_checkResult);
-
-        $refs = $this->GetReferenceList();
-        foreach ($refs as $ref) {
-            $this->UnregisterReference($ref);
-        }
         $propertyNames = ['ignore_category', 'post_script'];
-        foreach ($propertyNames as $name) {
-            $oid = $this->ReadPropertyInteger($name);
-            if ($oid >= 10000) {
-                $this->RegisterReference($oid);
-            }
-        }
+        $this->MaintainReferences($propertyNames);
 
         $ignore_objects = $this->ReadPropertyString('ignore_objects');
         $objectList = json_decode($ignore_objects, true);
@@ -113,17 +78,51 @@ class IntegrityCheck extends IPSModule
             }
         }
 
+        if ($this->CheckPrerequisites() != false) {
+            $this->MaintainTimer('PerformCheck', 0);
+            $this->MaintainTimer('MonitorThreads', 0);
+            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
+            return;
+        }
+
+        if ($this->CheckUpdate() != false) {
+            $this->MaintainTimer('PerformCheck', 0);
+            $this->MaintainTimer('MonitorThreads', 0);
+            $this->SetStatus(self::$IS_UPDATEUNCOMPLETED);
+            return;
+        }
+
+        if ($this->CheckConfiguration() != false) {
+            $this->MaintainTimer('PerformCheck', 0);
+            $this->MaintainTimer('MonitorThreads', 0);
+            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            return;
+        }
+
+        $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
+
+        $vpos = 0;
+
+        $this->MaintainVariable('Overview', $this->Translate('Overview'), VARIABLETYPE_STRING, '~HTMLBox', $vpos++, true);
+        $this->MaintainVariable('StartTime', $this->Translate('Start time'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
+        $this->MaintainVariable('ErrorCount', $this->Translate('Count of errors'), VARIABLETYPE_INTEGER, '', $vpos++, true);
+        $this->MaintainVariable('WarnCount', $this->Translate('Count of warnings'), VARIABLETYPE_INTEGER, '', $vpos++, true);
+        $this->MaintainVariable('InfoCount', $this->Translate('Count of informations'), VARIABLETYPE_INTEGER, '', $vpos++, true);
+        $this->MaintainVariable('LastUpdate', $this->Translate('Last update'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
+
+        $this->MaintainVariable('CheckResult', $this->Translate('Check result'), VARIABLETYPE_STRING, '', $vpos++, $save_checkResult);
+
         $module_disable = $this->ReadPropertyBoolean('module_disable');
         if ($module_disable) {
-            $this->SetTimerInterval('PerformCheck', 0);
-            $this->SetTimerInterval('MonitorThreads', 0);
+            $this->MaintainTimer('PerformCheck', 0);
+            $this->MaintainTimer('MonitorThreads', 0);
             $this->SetStatus(IS_INACTIVE);
             return;
         }
 
         if ($this->CheckConfiguration() != false) {
-            $this->SetTimerInterval('PerformCheck', 0);
-            $this->SetTimerInterval('MonitorThreads', 0);
+            $this->MaintainTimer('PerformCheck', 0);
+            $this->MaintainTimer('MonitorThreads', 0);
             $this->SetStatus(self::$IS_INVALIDCONFIG);
             return;
         }
@@ -134,124 +133,109 @@ class IntegrityCheck extends IPSModule
 
     private function GetFormElements()
     {
-        $formElements = [];
+        $formElements = $this->GetCommonFormElements('Symcon integrity check');
+
+        if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
+            return $formElements;
+        }
 
         $formElements[] = [
             'type'    => 'CheckBox',
             'name'    => 'module_disable',
-            'caption' => 'Disable instance'
-        ];
-
-        $s = $this->CheckConfiguration();
-        if ($s != '') {
-            $formElements[] = [
-                'type'    => 'Label',
-                'caption' => $s
-            ];
-            $formElements[] = [
-                'type'    => 'Label',
-            ];
-        }
-
-        $items = [];
-        $items[] = [
-            'type'    => 'Label',
-            'caption' => 'Perform check every X minutes'
-        ];
-        $items[] = [
-            'type'    => 'NumberSpinner',
-            'name'    => 'update_interval',
-            'caption' => 'Minutes'
-        ];
-
-        $items[] = [
-            'type'    => 'CheckBox',
-            'name'    => 'save_checkResult',
-            'caption' => 'Save complete results of the test'
-        ];
-
-        $items[] = [
-            'type'         => 'SelectScript',
-            'name'         => 'post_script',
-            'caption'      => 'Script called after test execution'
+            'caption' => 'Disable instance',
         ];
 
         $formElements[] = [
             'type'    => 'ExpansionPanel',
-            'items'   => $items,
-            'caption' => 'Basic settings'
-        ];
-
-        $items = [];
-        $items[] = [
-            'type'    => 'RowLayout',
             'items'   => [
                 [
-                    'type'     => 'List',
-                    'name'     => 'ignore_objects',
-                    'rowCount' => 5,
-                    'add'      => true,
-                    'delete'   => true,
-                    'columns'  => [
+                    'type'    => 'NumberSpinner',
+                    'name'    => 'update_interval',
+                    'minimum' => 0,
+                    'suffix'  => 'Minutes',
+                    'caption' => 'Interval of the full test',
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'save_checkResult',
+                    'caption' => 'Save complete results of the test',
+                ],
+                [
+                    'type'    => 'SelectScript',
+                    'name'    => 'post_script',
+                    'caption' => 'Script called after test execution',
+                ],
+            ],
+            'caption' => 'Basic settings',
+        ];
+
+        $formElements[] = [
+            'type'    => 'ExpansionPanel',
+            'items'   => [
+                [
+                    'type'    => 'RowLayout',
+                    'items'   => [
                         [
-                            'caption'  => 'objects',
-                            'name'     => 'ObjectID',
-                            'width'    => '400px',
-                            'add'      => -1,
-                            'edit'     => [
-                                'type'    => 'SelectObject',
-                                'caption' => 'Target'
+                            'type'     => 'List',
+                            'name'     => 'ignore_objects',
+                            'rowCount' => 5,
+                            'add'      => true,
+                            'delete'   => true,
+                            'columns'  => [
+                                [
+                                    'caption'  => 'objects',
+                                    'name'     => 'ObjectID',
+                                    'width'    => '400px',
+                                    'add'      => -1,
+                                    'edit'     => [
+                                        'type'    => 'SelectObject',
+                                        'caption' => 'Target'
+                                    ]
+                                ]
+                            ]
+                        ],
+                        [
+                            'type'     => 'List',
+                            'name'     => 'ignore_nums',
+                            'rowCount' => 5,
+                            'add'      => true,
+                            'delete'   => true,
+                            'columns'  => [
+                                [
+                                    'caption'  => 'Numbers',
+                                    'name'     => 'ID',
+                                    'width'    => '100px',
+                                    'add'      => '',
+                                    'edit'     => [
+                                        'type'     => 'ValidationTextBox',
+                                        'validate' => '^[0-9]{5}$',
+                                    ]
+                                ],
+                                [
+                                    'caption'  => 'Notice',
+                                    'name'     => 'notice',
+                                    'width'    => '200px',
+                                    'add'      => '',
+                                    'edit'     => [
+                                        'type'    => 'ValidationTextBox',
+                                    ]
+                                ]
                             ]
                         ]
                     ]
                 ],
                 [
-                    'type'     => 'List',
-                    'name'     => 'ignore_nums',
-                    'rowCount' => 5,
-                    'add'      => true,
-                    'delete'   => true,
-                    'columns'  => [
-                        [
-                            'caption'  => 'Numbers',
-                            'name'     => 'ID',
-                            'width'    => '100px',
-                            'add'      => '',
-                            'edit'     => [
-                                'type'     => 'ValidationTextBox',
-                                'validate' => '^[0-9]{5}$',
-                            ]
-                        ],
-                        [
-                            'caption'  => 'Notice',
-                            'name'     => 'notice',
-                            'width'    => '200px',
-                            'add'      => '',
-                            'edit'     => [
-                                'type'    => 'ValidationTextBox',
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $items[] = [
-            'type'    => 'SelectCategory',
-            'name'    => 'ignore_category',
-            'caption' => 'ignore objects below this category'
-        ];
-
-        $items[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'no_id_check',
-            'caption' => 'don\'t check PHP-line with this comment'
-        ];
-
-        $formElements[] = [
-            'type'    => 'ExpansionPanel',
-            'items'   => $items,
-            'caption' => 'Elements to be ignored ...'
+                    'type'    => 'SelectCategory',
+                    'name'    => 'ignore_category',
+                    'caption' => 'ignore objects below this category'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'no_id_check',
+                    'caption' => 'don\'t check PHP-line with this comment'
+                ],
+            ],
+            'caption' => 'Elements to be ignored ...',
         ];
 
         $formElements[] = [
@@ -296,16 +280,11 @@ class IntegrityCheck extends IPSModule
                     'width'   => '200px',
                 ],
                 [
-                    'type'    => 'Label',
-                ],
-                [
-                    'type'    => 'Label',
-                    'caption' => 'Perform check every X seconds'
-                ],
-                [
                     'type'    => 'NumberSpinner',
                     'name'    => 'monitor_interval',
-                    'caption' => 'Seconds'
+                    'minimum' => 0,
+                    'suffix'  => 'Seconds',
+                    'caption' => 'Thread check interval'
                 ],
                 [
                     'type'    => 'CheckBox',
@@ -322,26 +301,35 @@ class IntegrityCheck extends IPSModule
     {
         $formActions = [];
 
+        if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
+            $formActions[] = $this->GetCompleteUpdateFormAction();
+
+            $formActions[] = $this->GetInformationFormAction();
+            $formActions[] = $this->GetReferencesFormAction();
+
+            return $formActions;
+        }
+
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Perform check',
-            'onClick' => 'IntegrityCheck_PerformCheck($id);'
+            'onClick' => $this->GetModulePrefix() . '_PerformCheck($id);'
         ];
 
-        $formActions[] = $this->GetInformationForm();
-        $formActions[] = $this->GetReferencesForm();
+        $formActions[] = $this->GetInformationFormAction();
+        $formActions[] = $this->GetReferencesFormAction();
 
         return $formActions;
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction($ident, $value)
     {
-        if ($this->CommonRequestAction($Ident, $Value)) {
+        if ($this->CommonRequestAction($ident, $value)) {
             return;
         }
-        switch ($Ident) {
+        switch ($ident) {
             default:
-                $this->SendDebug(__FUNCTION__, 'invalid ident ' . $Ident, 0);
+                $this->SendDebug(__FUNCTION__, 'invalid ident ' . $ident, 0);
                 break;
         }
     }
@@ -350,11 +338,11 @@ class IntegrityCheck extends IPSModule
     {
         $min = $this->ReadPropertyInteger('update_interval');
         $msec = $min > 0 ? $min * 1000 * 60 : 0;
-        $this->SetTimerInterval('PerformCheck', $msec);
+        $this->MaintainTimer('PerformCheck', $msec);
 
         $sec = $this->ReadPropertyInteger('monitor_interval');
         $msec = $sec > 0 ? $sec * 1000 : 0;
-        $this->SetTimerInterval('MonitorThreads', $msec);
+        $this->MaintainTimer('MonitorThreads', $msec);
     }
 
     private function BuildOverview($checkResult)

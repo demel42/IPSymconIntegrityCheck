@@ -1,6 +1,6 @@
 # IPSymconIntegrityCheck
 
-[![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.5+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![IPS-Version](https://img.shields.io/badge/Symcon_Version-6.0+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -56,7 +56,7 @@ Die Auffälligkeiten werden detailliert ausgegeben und je nach Schwere als _Erro
 
 ## 2. Voraussetzungen
 
- - IP-Symcon ab Version 5.5
+ - IP-Symcon ab Version 6.0
 
 ## 3. Installation
 
@@ -134,6 +134,12 @@ GUIDs
   - IntegrityCheck: `{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}`
 
 ## 7. Versions-Historie
+
+- 1.7 @ 26.04.2022 15:41
+  - Implememtierung einer Update-Logik
+  - IPS-Version ist nun minimal 6.0
+  - Übersetzung vervollständigt
+  - diverse interne Änderungen
 
 - 1.6.8 @ 16.04.2022 11:57
   - potentieller Namenskonflikt behoben (trait CommonStubs)

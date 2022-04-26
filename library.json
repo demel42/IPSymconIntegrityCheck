@@ -4,9 +4,9 @@
 	"author": "Ch. Damsky",
 	"url": "https://github.com/demel42/IPSymconIntegrityCheck",
 	"compatibility": {
-		"version": "5.5"
+		"version": "6.0"
 	},
-	"version": "1.6.8",
+	"version": "1.7",
 	"build": 0,
-	"date": 1650103042
+	"date": 1650980495
 }
