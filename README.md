@@ -135,6 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.7.1 @ 29.04.2022 18:10
+  - Überlagerung von Translate und Aufteilung von locale.json in 3 translation.json (Modul, libs und CommonStubs)
+
 - 1.7 @ 26.04.2022 15:41
   - Implememtierung einer Update-Logik
   - IPS-Version ist nun minimal 6.0

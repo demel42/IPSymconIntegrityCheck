@@ -3,28 +3,11 @@
 		"de": {
 			"Symcon integrity check": "Symcon Integritätsprüfung",
 
-			"The following points of the configuration are incorrect": "Die folgenden Punkte der Konfiguration sind fehlerhaft",
+			"__function__": "CheckConfiguration",
 			"Thread monitoring is useless without saving results or notification": "Thread-Überwachung ist ohne Speicherung der Ergebnisse oder Benachrichtigung nutzlos",
 			"Runtime limit must be ascending": "Laufzeit-Grenzen müssen aufsteigend sein",
 
-			"The following system prerequisites are missing": "Folgende Systemvoraussetzungen fehlen",
-
-			"Still something to do to complete the update": "Es ist noch etwas zu tun, um das Update abzuschließen",
-			"old version": "alte Version",
-			"new version": "neue Version",
-			"unknwon": "unbekannt",
-			"The use of possible affected status variables can be checked in the expansion panel \"References\"":
-				"Die Verwendung möglicherweise betroffener Statusvariablen kann im Erweiterungspanel \"Referenzen\" überprüft werden",
-			"Press button 'Complete update' to carry out the required work": "Taste 'Update abschliessen' betätigen um die erforderlichen Arbeiten auszuführen",
-			"Complete update": "Update abschliessen",
-			"Unable to complete the update": "Das Update kann nicht abgeschlossen werden",
-			"please contact the author": "Bitte kontaktieren Sie den Autor",
-
-			"Instance has no active parent instance": "Instanz hat keine aktive übergeordnete Instanz",
-
-			"Status: Symcon Connect is OK!": "Status: Symcon Connect ist OK!",
-			"Error: Symcon Connect is not active!": "Fehler: Symcon Connect ist nicht aktiv!",
-
+			"__elements__": "",
 			"Disable instance": "Instanz deaktivieren",
 
 			"Basic settings": "Grundeinstellung",
@@ -39,8 +22,6 @@
 			"Only when utilisation above": "nur wenn Ausnutzung über",
 			"Error": "Fehler",
 
-			"Perform check": "Überprüfung durchführen",
-
 			"Elements to be ignored ...": "zu ignorierende Elemente ...",
 			"Notice": "Notiz",
 			"Numbers": "Zahlen",
@@ -54,6 +35,7 @@
 
 			"Notify about long-running threads": "Über lang laufende Threads benachrichtigen",
 
+			"__variables__": "",
 			"Overview": "Übersicht",
 			"Start time": "Startzeitpunkt",
 			"Count of errors": "Anzahl der Fehler",
@@ -62,6 +44,10 @@
 			"Last update": "Letzte Aktualisierung",
 			"Check result": "Ergebnisse der Prüfung",
 
+			"__actions__": "",
+			"Perform check": "Überprüfung durchführen",
+
+			"__function__": "PerformCheck",
 			"child object with ID {$childrenID} doesn't exists": "untergeordnetes Objekt mit ID {$childrenID} existiert nicht",
 			"condition variable {$varID} doesn't exists": "bedingende Variable {$varID} existiert nicht",
 			"default action with ID {$variableAction} doesn't exists": "Standardaktion mit ID {$variableAction} existiert nicht",
@@ -91,10 +77,10 @@
 			"user profile \"{$variableCustomProfile}\" doesn't exists": "Benutzerprofil \"{$variableCustomProfile}\" existiert nicht",
 			"user profile \"{$variableCustomProfile}\" has wrong type": "Benutzerprofil \"{$variableCustomProfile}\" hat falschen Typ",
 
-			"is faulty": "ist fehlerhaft",
 			"is not yet saved": "ist noch nicht gespeichert",
 			"is unused": "wird nicht verwendet",
 
+			"__function__": "BuildOverview",
 			"php script": "PHP-Skript",
 			"flow plan": "Ablaufplan",
 
@@ -119,51 +105,6 @@
 
 			"found {$errorCount} errors, {$warnCount} warnings and {$infoCount} informations":
 				"{$errorCount} Fehler, {$warnCount} Warnungen und {$infoCount} Informationen gefunden",
-
-			"Test area": "Test-Bereich",
-
-            "Expert area": "Experten-Bereich",
-            "Re-install variable-profiles": "Variablenprofile erneut einrichten",
-
-			"Information": "Information",
-			"Category": "Kategorie",
-			"Instance": "Instanz",
-			"Variable": "Variable",
-			"Script": "Skript",
-			"Event": "Ereignis",
-			"Medium": "Medium",
-			"Link": "Verknüpfung",
-			"PHP script": "PHP-Skript",
-			"Flow plan": "Ablaufplan",
-			"Triggered event": "Ausgelöstes Ereignis",
-			"Cyclic event": "Zyklisches Ereignis",
-			"Scheduled event": "Geplantes Ereignis",
-			"References": "Referenzen",
-			"by instance used objects": "durch die Instanz verwendete Objekte",
-			"Objects using the instance": "Objekte, die die Instanz verwenden",
-			"Referenced statusvariables": "referenzierte Statusvariablen",
-			"Ident": "Ident",
-			"Object": "Objekt",
-			"Area": "Bereich",
-			"Name": "Bezeichnung",
-			"Open object": "Objekt öffnen",
-			"Timer": "Timer",
-			"Interval": "Intervall",
-			"Next run": "nächste Ausführung",
-			"Last run": "letzte Ausführung",
-			"Timer information": "Timer-Information",
-			"Refresh references panel": "Referenzen-Panel aktualisieren",
-
-			"Instance getting created": "Instanz wird erstellt",
-			"Instance is active": "Instanz ist aktiv",
-			"Instance is deleted": "Instanz wird gelöscht",
-			"Instance is inactive": "Instanz ist inaktiv",
-			"Instance is not created": "Instanz wurde nicht erzeugt",
-
-			"Instance is inactive (invalid preconditions)": "Instanz ist inaktiv (ungültige Voraussetzungen)",
-			"Instance is inactive (update not completed)": "Instanz ist inaktiv (Update nicht abgeschlossen)",
-			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)",
-			"Instance is inactive (no Symcon-Connect)": "Instanz ist inaktiv (kein Symcon-Connect)",
 
 			"__end__": ""
 		}

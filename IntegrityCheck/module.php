@@ -10,6 +10,15 @@ class IntegrityCheck extends IPSModule
     use IntegrityCheck\StubsCommonLib;
     use IntegrityCheckLocalLib;
 
+    private $ModuleDir;
+
+    public function __construct(string $InstanceID)
+    {
+        parent::__construct($InstanceID);
+
+        $this->ModuleDir = __DIR__;
+    }
+
     public function Create()
     {
         parent::Create();
