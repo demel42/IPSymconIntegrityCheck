@@ -135,6 +135,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.7.2 @ 10.05.2022 15:06
+  - update submodule CommonStubs
+  - SetLocation() -> GetConfiguratorLocation()
+  - weitere Absicherung ungültiger ID's
+
 - 1.7.1 @ 29.04.2022 18:10
   - Überlagerung von Translate und Aufteilung von locale.json in 3 translation.json (Modul, libs und CommonStubs)
 
