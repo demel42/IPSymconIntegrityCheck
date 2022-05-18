@@ -135,6 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.7.5 @ 18.05.2022 14:51
+  - optional Modul-spezifische Status (>= 200) als Fehler melden
+
 - 1.7.4 @ 18.05.2022 11:18
   - Update-Funktion um der in IPS-Version 6.2 geänderten ID-Bedeutung Rechnung zu tragen
     'ignore_category' von 0 auf 1 korrigieren

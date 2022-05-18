@@ -30,6 +30,7 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('ignore_category', 1);
         $this->RegisterPropertyString('ignore_nums', json_encode([]));
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
+        $this->RegisterPropertyBoolean('modulstatus_as_error', true);
         $this->RegisterPropertyBoolean('save_checkResult', false);
         $this->RegisterPropertyInteger('post_script', 0);
 
@@ -155,14 +156,8 @@ class IntegrityCheck extends IPSModule
             return;
         }
 
-        if ($this->CheckConfiguration() != false) {
-            $this->MaintainTimer('PerformCheck', 0);
-            $this->MaintainTimer('MonitorThreads', 0);
-            $this->SetStatus(self::$IS_INVALIDCONFIG);
-            return;
-        }
-
         $this->SetStatus(IS_ACTIVE);
+
         $this->SetUpdateInterval();
     }
 
@@ -268,6 +263,11 @@ class IntegrityCheck extends IPSModule
                     'type'    => 'ValidationTextBox',
                     'name'    => 'no_id_check',
                     'caption' => 'don\'t check PHP-line with this comment'
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'modulstatus_as_error',
+                    'caption' => 'Report module-specific status (>= 200) as error',
                 ],
             ],
             'caption' => 'Elements to be ignored ...',
@@ -690,6 +690,8 @@ class IntegrityCheck extends IPSModule
             IS_NOTCREATED => 'Instance is not created',
         ];
 
+        $modulstatus_as_error = $this->ReadPropertyBoolean('modulstatus_as_error');
+
         $instanceList = IPS_GetInstanceList();
         $instanceActive = 0;
         foreach ($instanceList as $instanceID) {
@@ -719,7 +721,7 @@ class IntegrityCheck extends IPSModule
                     $lvl = self::$LEVEL_ERROR;
                     break;
                 default:
-                    $lvl = self::$LEVEL_INFO;
+                    $lvl = $modulstatus_as_error ? self::$LEVEL_ERROR : self::$LEVEL_INFO;
                     break;
             }
             $this->AddMessageEntry($messageList, 'instances', $instanceID, $s, $lvl);

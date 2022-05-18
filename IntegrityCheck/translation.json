@@ -32,6 +32,8 @@
 			"ignore objects below this category": "Objekte unterhalb der Kategorie ignorieren",
 			"don't check PHP-line with this comment": "PHP-Zeile mit diesem Kommentar nicht prüfen",
 
+			"Report module-specific status (>= 200) as error": "Modul-spezifische Status (>= 200) als Fehler melden",
+
 			"Save complete results of the test": "Ergebnisse der Prüfung vollständig speichern",
 			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
 			"Script called after test execution": "Skript, das nach Testdurchführung aufgerufen wird",
