@@ -3,6 +3,9 @@
 		"de": {
 			"Symcon integrity check": "Symcon Integritätsprüfung",
 
+			"__function__": "CheckUpdate",
+			"Adjust Field \"ignore objects below this category\"": "Feld \"Objekte unterhalb der Kategorie ignorieren\" korrigieren",
+
 			"__function__": "CheckConfiguration",
 			"Thread monitoring is useless without saving results or notification": "Thread-Überwachung ist ohne Speicherung der Ergebnisse oder Benachrichtigung nutzlos",
 			"Runtime limit must be ascending": "Laufzeit-Grenzen müssen aufsteigend sein",

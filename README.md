@@ -135,6 +135,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.7.4 @ 18.05.2022 11:18
+  - Update-Funktion um der in 6.2 geänderten ID-Bedeutung Rechnung zu tragen
+    'ignore_category' von 0 auf 1 korrigieren
+  - Default für property 'ignore_category' ist nun 1 (= keine Auswahl)
+
 - 1.7.3 @ 17.05.2022 15:38
   - update submodule CommonStubs
     Fix: Absicherung gegen fehlende Objekte

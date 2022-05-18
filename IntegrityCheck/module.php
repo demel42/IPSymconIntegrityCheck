@@ -27,7 +27,7 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterPropertyInteger('update_interval', 60);
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
-        $this->RegisterPropertyInteger('ignore_category', 0);
+        $this->RegisterPropertyInteger('ignore_category', 1);
         $this->RegisterPropertyString('ignore_nums', json_encode([]));
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
         $this->RegisterPropertyBoolean('save_checkResult', false);
@@ -67,6 +67,32 @@ class IntegrityCheck extends IPSModule
         }
 
         return $r;
+    }
+
+    private function CheckModuleUpdate(array $oldInfo, array $newInfo)
+    {
+        $r = [];
+
+        if ($this->version2num($oldInfo) < $this->version2num('1.7.4')) {
+            $ignore_category = $this->ReadPropertyInteger('ignore_category');
+            if ($ignore_category == 0) {
+                $r[] = $this->Translate('Adjust Field "ignore objects below this category"');
+            }
+        }
+
+        return $r;
+    }
+
+    private function CompleteModuleUpdate(array $oldInfo, array $newInfo)
+    {
+        if ($this->version2num($oldInfo) < $this->version2num('1.7.4')) {
+            $ignore_category = $this->ReadPropertyInteger('ignore_category');
+            if ($ignore_category == 0) {
+                IPS_SetProperty($this->InstanceID, 'ignore_category', 1);
+            }
+        }
+
+        return '';
     }
 
     public function ApplyChanges()
