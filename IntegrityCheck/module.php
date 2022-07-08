@@ -43,10 +43,21 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterAttributeString('UpdateInfo', '');
 
-        $this->RegisterTimer('PerformCheck', 0, $this->GetModulePrefix() . '_PerformCheck(' . $this->InstanceID . ');');
-        $this->RegisterTimer('MonitorThreads', 0, $this->GetModulePrefix() . '_MonitorThreads(' . $this->InstanceID . ');');
-
         $this->InstallVarProfiles(false);
+
+        $this->RegisterTimer('PerformCheck', 0, 'IPS_RequestAction(' . $this->InstanceID . ', "PerformCheck", "");');
+        $this->RegisterTimer('MonitorThreads', 0, 'IPS_RequestAction(' . $this->InstanceID . ', "MonitorThreads", "");');
+
+        $this->RegisterMessage(0, IPS_KERNELMESSAGE);
+    }
+
+    public function MessageSink($tstamp, $senderID, $message, $data)
+    {
+        parent::MessageSink($tstamp, $senderID, $message, $data);
+
+        if ($message == IPS_KERNELMESSAGE && $data[0] == KR_READY) {
+            $this->SetUpdateInterval();
+        }
     }
 
     private function CheckModuleConfiguration()
@@ -117,21 +128,21 @@ class IntegrityCheck extends IPSModule
         if ($this->CheckPrerequisites() != false) {
             $this->MaintainTimer('PerformCheck', 0);
             $this->MaintainTimer('MonitorThreads', 0);
-            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
+            $this->MaintainStatus(self::$IS_INVALIDPREREQUISITES);
             return;
         }
 
         if ($this->CheckUpdate() != false) {
             $this->MaintainTimer('PerformCheck', 0);
             $this->MaintainTimer('MonitorThreads', 0);
-            $this->SetStatus(self::$IS_UPDATEUNCOMPLETED);
+            $this->MaintainStatus(self::$IS_UPDATEUNCOMPLETED);
             return;
         }
 
         if ($this->CheckConfiguration() != false) {
             $this->MaintainTimer('PerformCheck', 0);
             $this->MaintainTimer('MonitorThreads', 0);
-            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            $this->MaintainStatus(self::$IS_INVALIDCONFIG);
             return;
         }
 
@@ -152,13 +163,15 @@ class IntegrityCheck extends IPSModule
         if ($module_disable) {
             $this->MaintainTimer('PerformCheck', 0);
             $this->MaintainTimer('MonitorThreads', 0);
-            $this->SetStatus(IS_INACTIVE);
+            $this->MaintainStatus(IS_INACTIVE);
             return;
         }
 
-        $this->SetStatus(IS_ACTIVE);
+        $this->MaintainStatus(IS_ACTIVE);
 
-        $this->SetUpdateInterval();
+        if (IPS_GetKernelRunlevel() == KR_READY) {
+            $this->SetUpdateInterval();
+        }
     }
 
     private function GetFormElements()
@@ -348,7 +361,7 @@ class IntegrityCheck extends IPSModule
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Perform check',
-            'onClick' => $this->GetModulePrefix() . '_PerformCheck($id);'
+            'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "PerformCheck", "");',
         ];
 
         $formActions[] = $this->GetInformationFormAction();
@@ -357,8 +370,28 @@ class IntegrityCheck extends IPSModule
         return $formActions;
     }
 
+    private function LocalRequestAction($ident, $value)
+    {
+        $r = true;
+        switch ($ident) {
+            case 'PerformCheck':
+                $this->PerformCheck();
+                break;
+            case 'MonitorThreads':
+                $this->MonitorThreads();
+                break;
+            default:
+                $r = false;
+                break;
+        }
+        return $r;
+    }
+
     public function RequestAction($ident, $value)
     {
+        if ($this->LocalRequestAction($ident, $value)) {
+            return;
+        }
         if ($this->CommonRequestAction($ident, $value)) {
             return;
         }
@@ -369,7 +402,7 @@ class IntegrityCheck extends IPSModule
         }
     }
 
-    protected function SetUpdateInterval()
+    private function SetUpdateInterval()
     {
         $min = $this->ReadPropertyInteger('update_interval');
         $msec = $min > 0 ? $min * 1000 * 60 : 0;

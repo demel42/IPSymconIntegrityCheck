@@ -135,6 +135,14 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.8 @ 08.07.2022 09:23 
+  - einige Funktionen (GetFormElements, GetFormActions) waren fehlerhafterweise "protected" und nicht "private"
+  - interne Funktionen sind nun private und ggfs nur noch via IPS_RequestAction() erreichbar
+  - IPS-KernelRunlevel korrekt beachten
+  - Fix: Angabe der Kompatibilität auf 6.2 korrigiert
+  - Verbesserung: IPS-Status wird nur noch gesetzt, wenn er sich ändert
+  - update submodule CommonStubs
+
 - 1.7.5 @ 18.05.2022 14:51
   - optional Modul-spezifische Status (>= 200) als Fehler melden
 

@@ -33,7 +33,7 @@ trait IntegrityCheckLocalLib
     public static $LEVEL_WARN = 1;
     public static $LEVEL_ERROR = 2;
 
-    public function InstallVarProfiles(bool $reInstall = false)
+    private function InstallVarProfiles(bool $reInstall = false)
     {
         if ($reInstall) {
             $this->SendDebug(__FUNCTION__, 'reInstall=' . $this->bool2str($reInstall), 0);
