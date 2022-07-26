@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.8.1 @ 26.07.2022 10:28
+  - update submodule CommonStubs
+    Fix: CheckModuleUpdate() nicht mehr aufrufen, wenn das erstmalig installiert wird
+
 - 1.8 @ 08.07.2022 09:23 
   - einige Funktionen (GetFormElements, GetFormActions) waren fehlerhafterweise "protected" und nicht "private"
   - interne Funktionen sind nun private und ggfs nur noch via IPS_RequestAction() erreichbar
