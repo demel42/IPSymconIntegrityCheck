@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.8.2 @ 01.08.2022 18:09
+  - Fix: fehlende Übersetzung ergänzt
+  - update submodule CommonStubs
+
 - 1.8.1 @ 26.07.2022 10:28
   - update submodule CommonStubs
     Fix: CheckModuleUpdate() nicht mehr aufrufen, wenn das erstmalig installiert wird

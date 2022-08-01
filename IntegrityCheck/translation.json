@@ -53,6 +53,7 @@
 			"Perform check": "Überprüfung durchführen",
 
 			"__function__": "PerformCheck",
+			"Status {$instanceStatus}": "Status {$instanceStatus}",
 			"child object with ID {$childrenID} doesn't exists": "untergeordnetes Objekt mit ID {$childrenID} existiert nicht",
 			"condition variable {$varID} doesn't exists": "bedingende Variable {$varID} existiert nicht",
 			"default action with ID {$variableAction} doesn't exists": "Standardaktion mit ID {$variableAction} existiert nicht",
