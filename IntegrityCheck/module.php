@@ -1125,6 +1125,9 @@ class IntegrityCheck extends IPSModule
         // Links
         $linkList = IPS_GetLinkList();
         foreach ($linkList as $linkID) {
+            if (in_array($linkID, $ignoreObjects)) {
+                continue;
+            }
             $link = IPS_GetLink($linkID);
             $targetID = $link['TargetID'];
             if (!IPS_ObjectExists($targetID)) {
@@ -1466,16 +1469,15 @@ class IntegrityCheck extends IPSModule
         return $ret;
     }
 
-    private function GetAllChildenIDs($catID, &$objIDs)
+    private function GetAllChildenIDs($objID, &$objIDs)
     {
-        $cIDs = IPS_GetChildrenIDs($catID);
-        foreach ($cIDs as $cID) {
-            $obj = IPS_GetObject($catID);
-            if ($obj['ObjectType'] == OBJECTTYPE_CATEGORY) {
+        $cIDs = IPS_GetChildrenIDs($objID);
+        if ($cIDs != []) {
+            $objIDs = array_merge($objIDs, $cIDs);
+            foreach ($cIDs as $cID) {
                 $this->GetAllChildenIDs($cID, $objIDs);
             }
         }
-        $objIDs = array_merge($objIDs, $cIDs);
     }
 
     public function MonitorThreads()
