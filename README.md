@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.9.1 @ 07.10.2022 13:59
+  - update submodule CommonStubs
+    Fix: Update-Prüfung wieder funktionsfähig
+
 - 1.9 @ 17.09.2022 11:12
   - Fix: "Objekte unterhalb der Kategorie ignorieren" berücksichtigt nun auch Kind-Objekte unterhalb anderer Objekt-Typen als Kategorie
   - Fix: zu ignorierende Objekte werden nun auch bei der Prüfung von Links berücksichtigt
