@@ -546,7 +546,50 @@ class IntegrityCheck extends IPSModule
         return $html;
     }
 
-    private function decodeAction($action, $steps, $lvl, $scriptID, $scriptTypeName, &$messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS)
+    private function decodeAction4Event($actionID, $actionParameters, $eventID, $eventTypeName, &$messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS)
+    {
+        $this->SendDebug(__FUNCTION__, 'event=' . IPS_GetName($eventID) . '(' . $eventID . '), actionID=' . $actionID . ', actionParameters=' . print_r($actionParameters, true), 0);
+
+        if (isset($actionParameters['VARIABLE'])) {
+            $varID = intval($actionParameters['VARIABLE']);
+            if ($this->IsValidID($varID) && IPS_VariableExists($varID) == false) {
+                $this->SendDebug(__FUNCTION__, $eventTypeName . ' - variable ' . $varID . ' doesn\'t exists', 0);
+                $s = $this->TranslateFormat($eventTypeName . ' - variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
+                $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+            }
+        }
+        if (isset($actionParameters['SCRIPT'])) {
+            $file = 'Action #' . $eventID;
+            $text = $actionParameters['SCRIPT'];
+		$this->SendDebug(__FUNCTION__, 'script='. $text, 0);
+            $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+            foreach ($ret as $r) {
+                $row = $r['row'];
+                $id = $r['id'];
+                if ($id != false) {
+                    $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                    $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                }
+            }
+            $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $eventTypeName, $fileListINC, $fileListIPS);
+            foreach ($ret as $r) {
+                $row = $r['row'];
+                if (isset($r['file'])) {
+                    $file = $r['file'];
+                    $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
+                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                } else {
+                    $id = $r['id'];
+                    if ($id != false) {
+                        $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - script with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                        $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                    }
+                }
+            }
+        }
+    }
+
+    private function decodeAction4FlowScript($action, $steps, $lvl, $scriptID, $scriptTypeName, &$messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS)
     {
         $step = '';
         for ($l = 0; $l <= $lvl; $l++) {
@@ -568,8 +611,8 @@ class IntegrityCheck extends IPSModule
             }
         }
 
-        if (isset($a['parameters']['VARIABLE'])) {
-            $varID = intval($a['parameters']['VARIABLE']);
+        if (isset($action['parameters']['VARIABLE'])) {
+            $varID = intval($action['parameters']['VARIABLE']);
             if ($this->IsValidID($varID) && IPS_VariableExists($varID) == false) {
                 $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - variable ' . $varID . ' doesn\'t exists', 0);
                 $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
@@ -624,7 +667,7 @@ class IntegrityCheck extends IPSModule
                 } else {
                     $id = $r['id'];
                     if ($id != false) {
-                        $s = $this->TranslateFormat('low-plan step {$step}, script row {$row} - script with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+                        $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - script with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
                         $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                     }
                 }
@@ -635,7 +678,7 @@ class IntegrityCheck extends IPSModule
             $steps[$lvl] = 0;
             foreach ($action['parameters']['ACTIONS'] as $a) {
                 $steps[$lvl]++;
-                $this->decodeAction($a, $steps, $lvl, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+                $this->decodeAction4FlowScript($a, $steps, $lvl, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
             }
         }
     }
@@ -947,7 +990,7 @@ class IntegrityCheck extends IPSModule
                     $steps = [0];
                     foreach ($jtext['actions'] as $action) {
                         $steps[0]++;
-                        $this->decodeAction($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+                        $this->decodeAction4FlowScript($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
                     }
                 }
             }
@@ -987,34 +1030,16 @@ class IntegrityCheck extends IPSModule
                     }
                 }
             }
-            $eventActionParameters = $event['EventActionParameters'];
-            if (isset($eventActionParameters['SCRIPT'])) {
-                $file = 'Event #' . $eventID;
-                $text = $eventActionParameters['SCRIPT'];
-                $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
-                foreach ($ret as $r) {
-                    $row = $r['row'];
-                    $id = $r['id'];
-                    if ($id != false) {
-                        $s = $this->TranslateFormat('event action, row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
-                        $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
-                    }
-                }
-                $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, 'php script', $fileListINC, $fileListIPS);
-                foreach ($ret as $r) {
-                    $row = $r['row'];
-                    if (isset($r['file'])) {
-                        $file = $r['file'];
-                        $s = $this->TranslateFormat('event action, row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
-                        $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
-                    } else {
-                        $id = $r['id'];
-                        if ($id != false) {
-                            $s = $this->TranslateFormat('event action, row {$row} - script with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
-                            $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
-                        }
-                    }
-                }
+
+            $actionID = $event['EventActionID'];
+            $actionParameters = $event['EventActionParameters'];
+            $this->decodeAction4Event($actionID, $actionParameters, $eventID, 'event action', $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+
+            $scheduleActions = $event['ScheduleActions'];
+            foreach ($scheduleActions as $scheduleAction) {
+                $actionID = $scheduleAction['ActionID'];
+                $actionParameters = $scheduleAction['ActionParameters'];
+                $this->decodeAction4Event($actionID, $actionParameters, $eventID, 'schedule action', $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
             }
         }
         $counterList['events'] = [

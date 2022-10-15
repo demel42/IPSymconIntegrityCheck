@@ -59,17 +59,27 @@
 			"default action with ID {$variableAction} doesn't exists": "Standardaktion mit ID {$variableAction} existiert nicht",
 			"default profile \"{$variableProfile}\" doesn't exists": "Standardprofil \"{$variableProfile}\" existiert nicht",
 			"default profile \"{$variableProfile}\" has wrong type": "Standardprofil \"{$variableProfile}\" hat falschen Typ",
-			"event action, row {$row} - a object with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
-			"event action, row {$row} - file \"{$file}\" is missing": "Ereignis-Aktion, Zeile {$row} - Datei \"{$file}\" fehlt",
-			"event action, row {$row} - script with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - Skript mit ID {$id} existiert nicht",
+
+			"event action - variable {$varID} doesn't exists": "Ereignis-Aktion - Variable {$varID} existiert nicht",
+			"event action, script row {$row} - a object with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
+			"event action, script row {$row} - file \"{$file}\" is missing": "Ereignis-Aktion, Zeile {$row} - Datei \"{$file}\" fehlt",
+			"event action, script row {$row} - script with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - Skript mit ID {$id} existiert nicht",
+
+			"schedule action - variable {$varID} doesn't exists": "Wochenplan-Aktion - Variable {$varID} existiert nicht",
+			"schedule action, script row {$row} - a object with ID {$id} doesn't exists": "Wochenplan-Aktion, Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
+			"schedule action, script row {$row} - file \"{$file}\" is missing": "Wochenplan-Aktion, Zeile {$row} - Datei \"{$file}\" fehlt",
+			"schedule action, script row {$row} - script with ID {$id} doesn't exists": "Wochenplan-Aktion, Zeile {$row} - Skript mit ID {$id} existiert nicht",
+
 			"file \"{$file}\" is missing": "Datei \"{$file}\" fehlt",
 			"file \"{$file}\" is unused": "Datei \"{$file}\" ist ungenutzt",
 			"file \"{$incFile}\" is missing": "Datei \"{$incFile}\" fehlt",
+
 			"flow plan step {$step}, script row {$row} - a object with ID {$id} doesn't exists": "Ablaufplan Schritt {$step}, Skript Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
 			"flow plan step {$step}, script row {$row} - file \"{$file}\" is missing": "Ablaufplan Schritt {$step}, Skript Zeile {$row} - Datei \"{$file}\" fehlt",
 			"flow plan step {$step}, script row {$row} - script with ID {$id} doesn't exists": "Ablaufplan Schritt {$step}, Skript Zeile {$row} - Skript mit ID {$id} existiert nicht",
 			"flow plan step {$step} - target {$varID} doesn't exists": "Ablaufplan Schritt {$step} - Ziel {$varID} existiert nicht",
 			"flow plan step {$step} - variable {$varID} doesn't exists": "Ablaufplan Schritt {$step} - Variable {$varID} existiert nicht",
+
 			"function \"{$ident}\" is running since {$duration}": "Funktion \"{$ident}\" hat läuft seit {$duration}",
 			"parent object with ID {$parentID} doesn't exists": "übergeordnetes Objekt mit ID {$parentID} existiert nicht",
 			"referenced object with ID {$refID} doesn't exists": "referenziertes Objekt mit ID {$refID} existiert nicht",

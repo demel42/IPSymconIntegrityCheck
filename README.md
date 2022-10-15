@@ -135,6 +135,12 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.10 @ 15.10.2022 14:46
+  - Neu: Überprüfung der Aktionen in Ereignissen und Wochenplänen (Variablen-ID, PHP-Code)
+  - Fix: in Ablaufplänen wurde die ID der Variable in Ablaufplänen nicht geprüft
+  - Fix: Schreibfehler in einer Fehlermeldung
+  - update submodule CommonStubs
+
 - 1.9.1 @ 07.10.2022 13:59
   - update submodule CommonStubs
     Fix: Update-Prüfung wieder funktionsfähig
