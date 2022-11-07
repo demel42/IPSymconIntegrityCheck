@@ -96,6 +96,8 @@
 			"is not yet saved": "ist noch nicht gespeichert",
 			"is unused": "wird nicht verwendet",
 
+			"is faulty": "ist fehlerhaft",
+
 			"__function__": "BuildOverview",
 			"php script": "PHP-Skript",
 			"flow plan": "Ablaufplan",

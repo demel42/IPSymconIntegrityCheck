@@ -525,7 +525,7 @@ class IntegrityCheck extends IPSModule
                     }
                 $html .= '<span style="color: ' . $col . ';">&nbsp;&nbsp;&nbsp;';
                 $id = $entry['ID'];
-                if (IPS_ObjectExists($id)) {
+                if ($this->IsValidID($id) && IPS_ObjectExists($id)) {
                     $html .= '#' . $id;
                     $loc = @IPS_GetLocation($id);
                     if ($loc != false) {
@@ -561,7 +561,7 @@ class IntegrityCheck extends IPSModule
         if (isset($actionParameters['SCRIPT'])) {
             $file = 'Action #' . $eventID;
             $text = $actionParameters['SCRIPT'];
-		$this->SendDebug(__FUNCTION__, 'script='. $text, 0);
+            $this->SendDebug(__FUNCTION__, 'script=' . $text, 0);
             $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
             foreach ($ret as $r) {
                 $row = $r['row'];
@@ -811,7 +811,7 @@ class IntegrityCheck extends IPSModule
             $refIDs = @IPS_GetReferenceList($instanceID);
             if ($refIDs != false) {
                 foreach ($refIDs as $refID) {
-                    if (IPS_ObjectExists($refID) == false) {
+                    if ($this->IsValidID($refID) && IPS_ObjectExists($refID) == false) {
                         $s = $this->TranslateFormat('referenced object with ID {$refID} doesn\'t exists', ['{$refID}' => $refID]);
                         $this->AddMessageEntry($messageList, 'instances', $instanceID, $s, self::$LEVEL_ERROR);
                     }
@@ -855,7 +855,7 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 if ($script['ScriptIsBroken']) {
-                    $s = $this->Translate('ist fehlerhaft');
+                    $s = $this->Translate('is faulty');
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 }
             }
@@ -923,7 +923,7 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, 'scripts', 0, $s, self::$LEVEL_INFO);
+                $this->AddMessageEntry($messageList, 'scripts', 1, $s, self::$LEVEL_INFO);
             }
 
             // fehlende Scripte

@@ -135,6 +135,12 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.12 @ 07.11.2022 09:04
+  - Fix: bei der Überprüfung von Referenzen wurde der Wert der ID nicht auf Gültigkeit sondern nur auf Existenz überprüft
+  - Fix: Übersetzungsfehler korrigiert
+  - Fix: ungenutzte Scripte wurden so ausgegeben, als wenn sie im Wurzelverzeichnis (ID #0 - _IP-Symcon_) liegen
+  - update submodule CommonStubs
+
 - 1.10 @ 15.10.2022 14:46
   - Neu: Überprüfung der Aktionen in Ereignissen und Wochenplänen (Variablen-ID, PHP-Code)
   - Fix: in Ablaufplänen wurde die ID der Variable in Ablaufplänen nicht geprüft
