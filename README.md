@@ -135,6 +135,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.13 @ 04.07.2023 14:44
+  - Vorbereitung auf IPS 7 / PHP 8.2
+  - update submodule CommonStubs
+    - Absicherung bei Zugriff auf Objekte und Inhalte
+
 - 1.12 @ 07.11.2022 09:04
   - Fix: bei der Überprüfung von Referenzen wurde der Wert der ID nicht auf Gültigkeit sondern nur auf Existenz überprüft
   - Fix: Übersetzungsfehler korrigiert
