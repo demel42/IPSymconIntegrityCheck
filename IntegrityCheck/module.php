@@ -437,7 +437,7 @@ class IntegrityCheck extends IPSModule
         $html = '';
         $html .= '<head>' . PHP_EOL;
         $html .= '<style>' . PHP_EOL;
-        $html .= 'body { margin: 1; padding: 0; font-family: "Open Sans", sans-serif; font-size: 16px; }' . PHP_EOL;
+        // $html .= 'body { margin: 1; padding: 0; font-family: "Open Sans", sans-serif; font-size: 16px; }' . PHP_EOL;
         $html .= 'table { border-collapse: collapse; border: 0px solid; margin: 0.5em;}' . PHP_EOL;
         $html .= 'th, td { padding: 1; }' . PHP_EOL;
         $html .= 'thead, tdata { text-align: left; }' . PHP_EOL;
@@ -508,7 +508,7 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             $n_messages++;
-            $html .= '<b>' . $this->Translate($tag) . ':</b><br>' . PHP_EOL;
+            $html .= $this->Translate($tag) . ':<br>' . PHP_EOL;
             foreach ($entries as $entry) {
                 $lvl = $entry['Level'];
                 switch ($lvl) {

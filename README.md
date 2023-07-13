@@ -135,6 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.13.1 @ 13.07.2023 14:39
+  - Fix: HTML korrigiert
+
 - 1.13 @ 04.07.2023 14:44
   - Vorbereitung auf IPS 7 / PHP 8.2
   - update submodule CommonStubs
