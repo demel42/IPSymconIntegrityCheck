@@ -10,13 +10,16 @@ class IntegrityCheck extends IPSModule
     use IntegrityCheck\StubsCommonLib;
     use IntegrityCheckLocalLib;
 
-    private $ModuleDir;
-
     public function __construct(string $InstanceID)
     {
         parent::__construct($InstanceID);
 
-        $this->ModuleDir = __DIR__;
+        $this->CommonContruct(__DIR__);
+    }
+
+    public function __destruct()
+    {
+        $this->CommonDestruct();
     }
 
     public function Create()
@@ -36,12 +39,15 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterPropertyInteger('monitor_interval', 60);
         $this->RegisterPropertyBoolean('monitor_with_logging', true);
+
         $this->RegisterPropertyInteger('thread_limit_info', 10);
         $this->RegisterPropertyInteger('thread_limit_warn', 60);
         $this->RegisterPropertyInteger('thread_limit_error', 300);
         $this->RegisterPropertyInteger('thread_warn_usage', 10);
+        $this->RegisterPropertyString('thread_ignore_scripts', json_encode([]));
 
-        $this->RegisterAttributeString('UpdateInfo', '');
+        $this->RegisterAttributeString('UpdateInfo', json_encode([]));
+        $this->RegisterAttributeString('ModuleStats', json_encode([]));
 
         $this->InstallVarProfiles(false);
 
@@ -121,6 +127,17 @@ class IntegrityCheck extends IPSModule
                 $oid = $obj['ObjectID'];
                 if ($this->IsValidID($oid)) {
                     $this->RegisterReference($oid);
+                }
+            }
+        }
+
+        $ignore_scripts = $this->ReadPropertyString('thread_ignore_scripts');
+        $scriptList = json_decode($ignore_scripts, true);
+        if ($ignore_scripts != false) {
+            foreach ($scriptList as $scr) {
+                $sid = $scr['ScriptID'];
+                if ($this->IsValidID($sid)) {
+                    $this->RegisterReference($sid);
                 }
             }
         }
@@ -326,6 +343,25 @@ class IntegrityCheck extends IPSModule
                     'name'    => 'thread_limit_error',
                     'caption' => 'Error',
                     'width'   => '200px',
+                ],
+                [
+                    'type'     => 'List',
+                    'name'     => 'thread_ignore_scripts',
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
+                        [
+                            'caption'  => 'Scripts to be ignored ...',
+                            'name'     => 'ScriptID',
+                            'width'    => '400px',
+                            'add'      => -1,
+                            'edit'     => [
+                                'type'    => 'SelectScript',
+                                'caption' => 'Scripts to be ignored ...'
+                            ]
+                        ]
+                    ]
                 ],
                 [
                     'type'    => 'NumberSpinner',
@@ -1513,6 +1549,20 @@ class IntegrityCheck extends IPSModule
         $thread_warn_usage = $this->ReadPropertyInteger('thread_warn_usage');
         $monitor_with_logging = $this->ReadPropertyBoolean('monitor_with_logging');
 
+        // zu ignorierende Script-IDs
+        $ignoreScripts = [];
+        $ignore_scripts = $this->ReadPropertyString('thread_ignore_scripts');
+        $scriptList = json_decode($ignore_scripts, true);
+        if ($ignore_scripts != false) {
+            foreach ($scriptList as $scr) {
+                $sid = $scr['ScriptID'];
+                if (IPS_ScriptExists($sid)) {
+                    $this->RegisterReference($sid);
+                    $ignoreScripts[] = $sid;
+                }
+            }
+        }
+
         $save_checkResult = $this->ReadPropertyBoolean('save_checkResult');
         if ($save_checkResult) {
             $old_CheckResult = $this->GetValue('CheckResult');
@@ -1582,6 +1632,9 @@ class IntegrityCheck extends IPSModule
             $threadId = $thread['ThreadID'];
             $scriptID = $thread['ScriptID'];
             if ($this->IsValidID($scriptID)) {
+                if (in_array($scriptID, $ignoreScripts)) {
+                    continue;
+                }
                 $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
                 $s = $this->TranslateFormat('script "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
                 $m = 'thread=' . $threadId . ', script=' . $ident . ', sender=' . $sender . ', duration=' . $duration;

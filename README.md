@@ -113,6 +113,7 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 | Threads-Infogrenze                                | integer | 10           | Grenzwert der Laufzeit in Sekunden (Information) |
 | Threads-Warngrenze                                | integer | 30           | Grenzwert der Laufzeit in Sekunden (Warnung) |
 | Threads-Fehlergrenze                              | integer | 120          | Grenzwert der Laufzeit in Sekunden (Fehlermeldung) |
+| zu ignorierende Skripte                           |         |              | Liste von Scripten, deren Laufzeit nicht überwacht werden sollen |
 |                                                   |         |              | |
 
 - *... Zahlen*
@@ -134,6 +135,11 @@ GUIDs
   - IntegrityCheck: `{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}`
 
 ## 7. Versions-Historie
+
+- 1.14 @ 13.09.2023 16:50
+  - Neu: optionaler Ausschluss bestimmter Script aus der Überwachung der Thread-Laufzeit
+  - Neu: Ermittlung von Speicherbedarf und Laufzeit (aktuell und für 31 Tage) und Anzeige im Panel "Information"
+  - update submodule CommonStubs
 
 - 1.13.1 @ 13.07.2023 14:39
   - Fix: HTML korrigiert
@@ -172,7 +178,7 @@ GUIDs
   - update submodule CommonStubs
     Fix: CheckModuleUpdate() nicht mehr aufrufen, wenn das erstmalig installiert wird
 
-- 1.8 @ 08.07.2022 09:23 
+- 1.8 @ 08.07.2022 09:23
   - einige Funktionen (GetFormElements, GetFormActions) waren fehlerhafterweise "protected" und nicht "private"
   - interne Funktionen sind nun private und ggfs nur noch via IPS_RequestAction() erreichbar
   - IPS-KernelRunlevel korrekt beachten

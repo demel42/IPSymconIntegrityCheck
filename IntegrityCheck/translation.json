@@ -38,6 +38,8 @@
 			"Send mail when errors are detected": "Mail schicken, wenn Fehler entdeckt werden",
 			"Script called after test execution": "Skript, das nach Testdurchführung aufgerufen wird",
 
+			"Scripts to be ignored ...": "zu ignorierende Skripte ...",
+
 			"Notify about long-running threads": "Über lang laufende Threads benachrichtigen",
 
 			"__variables__": "",
