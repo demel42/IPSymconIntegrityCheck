@@ -136,7 +136,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.14 @ 16.10.2023 09:30
+- 1.14 @ 03.11.2023 11:06
   - Neu: optionaler Ausschluss bestimmter Script aus der Überwachung der Thread-Laufzeit
   - Neu: Ermittlung von Speicherbedarf und Laufzeit (aktuell und für 31 Tage) und Anzeige im Panel "Information"
   - update submodule CommonStubs
