@@ -249,7 +249,15 @@ class IntegrityCheck extends IPSModule
                                     'add'      => -1,
                                     'edit'     => [
                                         'type'    => 'SelectObject',
-                                        'caption' => 'Target'
+                                    ]
+                                ],
+                                [
+                                    'caption'  => 'including children',
+                                    'name'     => 'with_childs',
+                                    'width'    => '200px',
+                                    'add'      => false,
+                                    'edit'     => [
+                                        'type'    => 'CheckBox',
                                     ]
                                 ]
                             ]
@@ -738,6 +746,10 @@ class IntegrityCheck extends IPSModule
                 $oid = $obj['ObjectID'];
                 if (IPS_ObjectExists($oid)) {
                     $ignoreObjects[] = $oid;
+                    $with_childs = isset($obj['with_childs']) ? $obj['with_childs'] : false;
+                    if ($with_childs) {
+                        $this->GetAllChildenIDs($oid, $ignoreObjects);
+                    }
                 }
             }
         }
