@@ -30,7 +30,6 @@ class IntegrityCheck extends IPSModule
 
         $this->RegisterPropertyInteger('update_interval', 60);
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
-        $this->RegisterPropertyInteger('ignore_category', 1);
         $this->RegisterPropertyString('ignore_nums', json_encode([]));
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
         $this->RegisterPropertyBoolean('modulstatus_as_error', true);
@@ -45,6 +44,9 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('thread_limit_error', 300);
         $this->RegisterPropertyInteger('thread_warn_usage', 10);
         $this->RegisterPropertyString('thread_ignore_scripts', json_encode([]));
+
+        // ungenutzte Properties
+        $this->RegisterPropertyInteger('ignore_category', 1);
 
         $this->RegisterAttributeString('UpdateInfo', json_encode([]));
         $this->RegisterAttributeString('ModuleStats', json_encode([]));
@@ -98,6 +100,13 @@ class IntegrityCheck extends IPSModule
             }
         }
 
+        if ($this->version2num($oldInfo) < $this->version2num('1.16')) {
+            $ignore_category = $this->ReadPropertyInteger('ignore_category');
+            if ($ignore_category > 1) {
+                $r[] = $this->Translate('Field "ignore objects below this category" is now included in the list of objects to be ignored');
+            }
+        }
+
         return $r;
     }
 
@@ -110,6 +119,20 @@ class IntegrityCheck extends IPSModule
             }
         }
 
+        if ($this->version2num($oldInfo) < $this->version2num('1.16')) {
+            $ignore_category = $this->ReadPropertyInteger('ignore_category');
+            if ($ignore_category > 1) {
+                $ignore_objects = json_decode($this->ReadPropertyString('ignore_objects'), true);
+                $o = [
+                    'ObjectID'    => $ignore_category,
+                    'with_childs' => true,
+                ];
+                array_unshift($ignore_objects, $o);
+                IPS_SetProperty($this->InstanceID, 'ignore_objects', json_encode($ignore_objects));
+                IPS_SetProperty($this->InstanceID, 'ignore_category', 1);
+            }
+        }
+
         return '';
     }
 
@@ -117,7 +140,7 @@ class IntegrityCheck extends IPSModule
     {
         parent::ApplyChanges();
 
-        $propertyNames = ['ignore_category', 'post_script'];
+        $propertyNames = ['post_script'];
         $this->MaintainReferences($propertyNames);
 
         $ignore_objects = $this->ReadPropertyString('ignore_objects');
@@ -233,69 +256,61 @@ class IntegrityCheck extends IPSModule
             'type'    => 'ExpansionPanel',
             'items'   => [
                 [
-                    'type'    => 'RowLayout',
-                    'items'   => [
+                    'type'     => 'List',
+                    'name'     => 'ignore_objects',
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
                         [
-                            'type'     => 'List',
-                            'name'     => 'ignore_objects',
-                            'rowCount' => 5,
-                            'add'      => true,
-                            'delete'   => true,
-                            'columns'  => [
-                                [
-                                    'caption'  => 'objects',
-                                    'name'     => 'ObjectID',
-                                    'width'    => '400px',
-                                    'add'      => -1,
-                                    'edit'     => [
-                                        'type'    => 'SelectObject',
-                                    ]
-                                ],
-                                [
-                                    'caption'  => 'including children',
-                                    'name'     => 'with_childs',
-                                    'width'    => '200px',
-                                    'add'      => false,
-                                    'edit'     => [
-                                        'type'    => 'CheckBox',
-                                    ]
-                                ]
+                            'caption'  => 'objects',
+                            'name'     => 'ObjectID',
+                            'width'    => '400px',
+                            'add'      => -1,
+                            'edit'     => [
+                                'type'    => 'SelectObject',
                             ]
                         ],
                         [
-                            'type'     => 'List',
-                            'name'     => 'ignore_nums',
-                            'rowCount' => 5,
-                            'add'      => true,
-                            'delete'   => true,
-                            'columns'  => [
-                                [
-                                    'caption'  => 'Numbers',
-                                    'name'     => 'ID',
-                                    'width'    => '100px',
-                                    'add'      => '',
-                                    'edit'     => [
-                                        'type'     => 'ValidationTextBox',
-                                        'validate' => '^[0-9]{5}$',
-                                    ]
-                                ],
-                                [
-                                    'caption'  => 'Notice',
-                                    'name'     => 'notice',
-                                    'width'    => '200px',
-                                    'add'      => '',
-                                    'edit'     => [
-                                        'type'    => 'ValidationTextBox',
-                                    ]
-                                ]
+                            'caption'  => 'including children',
+                            'name'     => 'with_childs',
+                            'width'    => '200px',
+                            'add'      => false,
+                            'edit'     => [
+                                'type'    => 'CheckBox',
                             ]
                         ]
-                    ]
+                    ],
+                    'caption' => 'Objects to be ignored',
                 ],
                 [
-                    'type'    => 'SelectCategory',
-                    'name'    => 'ignore_category',
-                    'caption' => 'ignore objects below this category'
+                    'type'     => 'List',
+                    'name'     => 'ignore_nums',
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
+                        [
+                            'caption'  => 'Numbers',
+                            'name'     => 'ID',
+                            'width'    => '100px',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'     => 'ValidationTextBox',
+                                'validate' => '^[0-9]{5}$',
+                            ]
+                        ],
+                        [
+                            'caption'  => 'Notice',
+                            'name'     => 'notice',
+                            'width'    => '500px',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'    => 'ValidationTextBox',
+                            ]
+                        ]
+                    ],
+                    'caption' => 'Numbers to be ignored',
                 ],
                 [
                     'type'    => 'ValidationTextBox',
@@ -754,11 +769,6 @@ class IntegrityCheck extends IPSModule
             }
         }
 
-        $ignore_category = $this->ReadPropertyInteger('ignore_category');
-        if (IPS_CategoryExists($ignore_category)) {
-            $this->GetAllChildenIDs($ignore_category, $ignoreObjects);
-        }
-
         $this->SendDebug(__FUNCTION__, 'ignoreObjects=' . print_r($ignoreObjects, true), 0);
 
         // zu ignorierende Zahlen
@@ -782,8 +792,10 @@ class IntegrityCheck extends IPSModule
 
         // Objekte
         $objectList = IPS_GetObjectList();
+        $objectIgnored = 0;
         foreach ($objectList as $objectID) {
             if (in_array($objectID, $ignoreObjects)) {
+                $objectIgnored++;
                 continue;
             }
             $object = IPS_GetObject($objectID);
@@ -802,7 +814,8 @@ class IntegrityCheck extends IPSModule
             }
         }
         $counterList['objects'] = [
-            'total' => count($objectList)
+            'total'   => count($objectList),
+            'ignored' => $objectIgnored,
         ];
 
         // Instanzen
@@ -817,9 +830,11 @@ class IntegrityCheck extends IPSModule
         $modulstatus_as_error = $this->ReadPropertyBoolean('modulstatus_as_error');
 
         $instanceList = IPS_GetInstanceList();
+        $instanceIgnored = 0;
         $instanceActive = 0;
         foreach ($instanceList as $instanceID) {
             if (in_array($instanceID, $ignoreObjects)) {
+                $instanceIgnored++;
                 continue;
             }
             $instance = IPS_GetInstance($instanceID);
@@ -868,12 +883,14 @@ class IntegrityCheck extends IPSModule
         }
 
         $counterList['instances'] = [
-            'total'  => count($instanceList),
-            'active' => $instanceActive,
+            'total'   => count($instanceList),
+            'ignored' => $objectIgnored,
+            'active'  => $instanceActive,
         ];
 
         // Scripte
         $scriptList = IPS_GetScriptList();
+        $scriptIgnored = 0;
         $scriptTypeCount = [];
         $scriptTypes = [SCRIPTTYPE_PHP];
         $scriptTypeNames = ['php script'];
@@ -897,11 +914,12 @@ class IntegrityCheck extends IPSModule
                 if ($script['ScriptType'] != $scriptType) {
                     continue;
                 }
-                $scriptTypeCount[$scriptType]++;
                 $fileListIPS[] = $script['ScriptFile'];
                 if (in_array($scriptID, $ignoreObjects)) {
+                    $scriptIgnored++;
                     continue;
                 }
+                $scriptTypeCount[$scriptType]++;
                 if ($script['ScriptIsBroken']) {
                     $s = $this->Translate('is faulty');
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
@@ -1045,15 +1063,18 @@ class IntegrityCheck extends IPSModule
         }
 
         $counterList['scripts'] = [
-            'total' => count($scriptList),
-            'types' => $scriptTypeCount,
+            'total'   => count($scriptList),
+            'ignored' => $scriptIgnored,
+            'types'   => $scriptTypeCount,
         ];
 
         // Events
         $eventList = IPS_GetEventList();
+        $eventIgnored = 0;
         $eventActive = 0;
         foreach ($eventList as $eventID) {
             if (in_array($eventID, $ignoreObjects)) {
+                $eventIgnored++;
                 continue;
             }
             $event = IPS_GetEvent($eventID);
@@ -1091,15 +1112,18 @@ class IntegrityCheck extends IPSModule
             }
         }
         $counterList['events'] = [
-            'total'  => count($eventList),
-            'active' => $eventActive,
+            'total'   => count($eventList),
+            'ignored' => $eventIgnored,
+            'active'  => $eventActive,
         ];
 
         // Variablen
         $variableList = IPS_GetVariableList();
+        $variableIgnored = 0;
         $variableUnused = 0;
         foreach ($variableList as $variableID) {
             if (in_array($variableID, $ignoreObjects)) {
+                $variableIgnored++;
                 continue;
             }
             $variable = IPS_GetVariable($variableID);
@@ -1158,15 +1182,18 @@ class IntegrityCheck extends IPSModule
             }
         }
         $counterList['variables'] = [
-            'total'  => count($variableList),
-            'unused' => $variableUnused,
+            'total'   => count($variableList),
+            'ignored' => $variableIgnored,
+            'unused'  => $variableUnused,
         ];
 
         // Medien
         $path = IPS_GetKernelDir();
         $mediaList = IPS_GetMediaList();
+        $mediaIgnored = 0;
         foreach ($mediaList as $mediaID) {
             if (in_array($mediaID, $ignoreObjects)) {
+                $mediaIgnored++;
                 continue;
             }
             $media = IPS_GetMedia($mediaID);
@@ -1186,19 +1213,30 @@ class IntegrityCheck extends IPSModule
             }
         }
         $counterList['media'] = [
-            'total' => count($mediaList)
+            'total'   => count($mediaList),
+            'ignored' => $mediaIgnored,
         ];
 
         // Kategorien
         $categoryList = IPS_GetCategoryList();
+        $categoryIgnored = 0;
+        foreach ($categoryList as $categoryID) {
+            if (in_array($categoryID, $ignoreObjects)) {
+                $categoryIgnored++;
+                continue;
+            }
+        }
         $counterList['categories'] = [
-            'total' => count($categoryList)
+            'total'   => count($categoryList),
+            'ignored' => $categoryIgnored,
         ];
 
         // Links
         $linkList = IPS_GetLinkList();
+        $linkIgnored = 0;
         foreach ($linkList as $linkID) {
             if (in_array($linkID, $ignoreObjects)) {
+                $linkIgnored++;
                 continue;
             }
             $link = IPS_GetLink($linkID);
@@ -1209,7 +1247,8 @@ class IntegrityCheck extends IPSModule
             }
         }
         $counterList['links'] = [
-            'total' => count($linkList)
+            'total'   => count($linkList),
+            'ignored' => $linkIgnored,
         ];
 
         // Module

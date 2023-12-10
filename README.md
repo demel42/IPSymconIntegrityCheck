@@ -105,7 +105,6 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 | zu ignorierende Elemente                          |         |              | |
 | ... Objekte                                       | table   |              | Liste von Objekten, die nicht geprüft werden sollen |
 | ... Zahlen                                        | table   |              | Liste von Zahlen, die nicht als Objekt-ID erkannt werden sollen |
-| Objekte unterhalb der Kategorie ignorieren        | integer |              | Kategorie für zu ignorierende Objekte |
 | PHP-Kommentar                                     | string  |              | PHP-Kommentar, um einzelne Zeilen auszunehmen |
 |                                                   |         |              | |
 | Prüfung durchführen ...                           | integer | 60           | Durchführungsintervall, Angabe in Minuten |
@@ -135,6 +134,10 @@ GUIDs
   - IntegrityCheck: `{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}`
 
 ## 7. Versions-Historie
+
+- 1.16 @ 10.12.2023 17:19
+  - Neu: Ermittlung der Anzahl der zu ignorierenden Objekte nach Typ
+  - Neu: Einstellung "Objekte unterhalb der Kategorie ignorieren" wird im Rahmen des Update in "zu ignorierenden Objekte" überführt
 
 - 1.15 @ 09.12.2023 16:59
   - Neu: optional können die Kinder von zu ignorierenden Onjekten ebenfalls ausgeschlossen werden

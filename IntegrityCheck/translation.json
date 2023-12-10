@@ -5,6 +5,8 @@
 
 			"__function__": "CheckUpdate",
 			"Adjust Field \"ignore objects below this category\"": "Feld \"Objekte unterhalb der Kategorie ignorieren\" korrigieren",
+			"Field \"ignore objects below this category\" is now included in the list of objects to be ignored":
+				"Das Feld \"Objekte unterhalb dieser Kategorie ignorieren\" ist jetzt in der Liste der zu ignorierenden Objekte enthalten",
 
 			"__function__": "CheckConfiguration",
 			"Thread monitoring is useless without saving results or notification": "Thread-Überwachung ist ohne Speicherung der Ergebnisse oder Benachrichtigung nutzlos",
@@ -26,11 +28,11 @@
 			"Error": "Fehler",
 
 			"Elements to be ignored ...": "zu ignorierende Elemente ...",
+			"Objects to be ignored": "Zu ignorierende Objekte",
 			"including children": "inklusive Kinder",
-			"Notice": "Notiz",
+			"Numbers to be ignored": "Zu ignorierende Zahlen",
 			"Numbers": "Zahlen",
-
-			"ignore objects below this category": "Objekte unterhalb der Kategorie ignorieren",
+			"Notice": "Notiz",
 			"don't check PHP-line with this comment": "PHP-Zeile mit diesem Kommentar nicht prüfen",
 
 			"Report module-specific status (>= 200) as error": "Modul-spezifische Status (>= 200) als Fehler melden",
