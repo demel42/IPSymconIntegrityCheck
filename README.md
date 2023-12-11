@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.16.2 @ 11.12.2023 17:56
+- 1.16.2 @ 11.12.2023 18:14
   - Fix: diverse interne Flüchtigkeitsfehler korrigiert
 
 - 1.16.1 @ 11.12.2023 17:08
