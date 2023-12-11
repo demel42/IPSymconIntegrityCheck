@@ -636,7 +636,7 @@ class IntegrityCheck extends IPSModule
                 if (isset($r['file'])) {
                     $file = $r['file'];
                     $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
-                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                    $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                 } else {
                     $id = $r['id'];
                     if ($id != false) {
@@ -1256,6 +1256,7 @@ class IntegrityCheck extends IPSModule
         foreach ($moduleList as $guid) {
             $module = IPS_GetModule($guid);
             $moduleID = $module['ModuleID'];
+            $moduleName = $module['ModuleName'];
             if (IPS_ModuleExists($moduleID) == false) {
                 $s = $this->TranslateFormat('module {$moduleName}: module "{$moduleID}" is missing', ['{$moduleName}' => $moduleName, '{$moduleID}' => $moduleID]);
                 $this->AddMessageEntry($messageList, 'modules', 0, $s, self::$LEVEL_ERROR);
@@ -1334,20 +1335,21 @@ class IntegrityCheck extends IPSModule
             }
 
             $sec = $now - $startTime;
+
             $duration = '';
-            if ($sec > 3600) {
-                $duration .= sprintf('%dh', floor($sec / 3600));
-                $sec = $sec % 3600;
+            $i = $sec;
+            if ($i > 3600) {
+                $duration .= sprintf('%dh', floor($i / 3600));
+                $i = $i % 3600;
             }
-            if ($sec > 60) {
-                $duration .= sprintf('%dm', floor($sec / 60));
-                $sec = $sec % 60;
+            if ($i > 60) {
+                $duration .= sprintf('%dm', floor($i / 60));
+                $i = $i % 60;
             }
-            if ($sec > 0 || $duration == '') {
-                $duration .= sprintf('%ds', $sec);
-                $sec = floor($sec);
+            if ($i > 0 || $duration == '') {
+                $duration .= sprintf('%ds', $i);
+                $i = floor($i);
             }
-            $sec = $now - $startTime;
 
             $scriptID = $thread['ScriptID'];
             if ($this->IsValidID($scriptID)) {
@@ -1664,20 +1666,21 @@ class IntegrityCheck extends IPSModule
             $this->SendDebug(__FUNCTION__, 'thread #' . $i . '=' . print_r($thread, true), 0);
 
             $sec = $now - $startTime;
+
             $duration = '';
-            if ($sec > 3600) {
-                $duration .= sprintf('%dh', floor($sec / 3600));
-                $sec = $sec % 3600;
+            $i = $sec;
+            if ($i > 3600) {
+                $duration .= sprintf('%dh', floor($i / 3600));
+                $i = $i % 3600;
             }
-            if ($sec > 60) {
-                $duration .= sprintf('%dm', floor($sec / 60));
-                $sec = $sec % 60;
+            if ($i > 60) {
+                $duration .= sprintf('%dm', floor($i / 60));
+                $i = $i % 60;
             }
-            if ($sec > 0 || $duration == '') {
-                $duration .= sprintf('%ds', $sec);
-                $sec = floor($sec);
+            if ($i > 0 || $duration == '') {
+                $duration .= sprintf('%ds', $i);
+                $i = floor($i);
             }
-            $sec = $now - $startTime;
 
             $sender = $thread['Sender'];
             $threadId = $thread['ThreadID'];
