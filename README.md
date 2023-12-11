@@ -135,6 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.16.1 @ 11.12.2023 17:08
+  - Fix: Anzahl der ignorierten Instanzen war falsch
+
 - 1.16 @ 10.12.2023 17:19
   - Neu: Ermittlung der Anzahl der zu ignorierenden Objekte nach Typ
   - Neu: Einstellung "Objekte unterhalb der Kategorie ignorieren" wird im Rahmen des Update in "zu ignorierenden Objekte" überführt

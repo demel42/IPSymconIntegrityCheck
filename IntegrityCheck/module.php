@@ -884,7 +884,7 @@ class IntegrityCheck extends IPSModule
 
         $counterList['instances'] = [
             'total'   => count($instanceList),
-            'ignored' => $objectIgnored,
+            'ignored' => $instanceIgnored,
             'active'  => $instanceActive,
         ];
 
