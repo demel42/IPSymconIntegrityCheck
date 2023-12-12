@@ -33,6 +33,8 @@
 			"Numbers to be ignored": "Zu ignorierende Zahlen",
 			"Numbers": "Zahlen",
 			"Notice": "Notiz",
+			"PHP files in or below script to be ignored": "PHP-Dateien im oder unter dem Skript werden ignoriert",
+			"Filename": "Dateiname",
 			"don't check PHP-line with this comment": "PHP-Zeile mit diesem Kommentar nicht prüfen",
 
 			"Report module-specific status (>= 200) as error": "Modul-spezifische Status (>= 200) als Fehler melden",

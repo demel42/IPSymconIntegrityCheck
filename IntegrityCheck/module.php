@@ -31,6 +31,15 @@ class IntegrityCheck extends IPSModule
         $this->RegisterPropertyInteger('update_interval', 60);
         $this->RegisterPropertyString('ignore_objects', json_encode([]));
         $this->RegisterPropertyString('ignore_nums', json_encode([]));
+        $ignore_files = [
+            [
+                'filename' => '__generated.inc.php',
+            ],
+            [
+                'filename' => '__autoload.php',
+            ],
+        ];
+        $this->RegisterPropertyString('ignore_files', json_encode($ignore_files));
         $this->RegisterPropertyString('no_id_check', '/*NO_ID_CHECK*/');
         $this->RegisterPropertyBoolean('modulstatus_as_error', true);
         $this->RegisterPropertyBoolean('save_checkResult', false);
@@ -311,6 +320,35 @@ class IntegrityCheck extends IPSModule
                         ]
                     ],
                     'caption' => 'Numbers to be ignored',
+                ],
+                [
+                    'type'     => 'List',
+                    'name'     => 'ignore_files',
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
+                        [
+                            'caption'  => 'Filename',
+                            'name'     => 'filename',
+                            'width'    => '300px',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'     => 'ValidationTextBox',
+                                'validate' => '^.*\.php$',
+                            ]
+                        ],
+                        [
+                            'caption'  => 'Notice',
+                            'name'     => 'notice',
+                            'width'    => '300px',
+                            'add'      => '',
+                            'edit'     => [
+                                'type'    => 'ValidationTextBox',
+                            ]
+                        ]
+                    ],
+                    'caption' => 'PHP files in or below script to be ignored',
                 ],
                 [
                     'type'    => 'ValidationTextBox',
@@ -776,8 +814,8 @@ class IntegrityCheck extends IPSModule
         $ignore_nums = $this->ReadPropertyString('ignore_nums');
         $numList = json_decode($ignore_nums, true);
         if ($numList != false) {
-            foreach ($numList as $num) {
-                $id = $num['ID'];
+            foreach ($numList as $numEnt) {
+                $id = $numEnt['ID'];
                 if ($this->IsValidID($id)) {
                     $ignoreNums[] = $id;
                 }
@@ -927,6 +965,14 @@ class IntegrityCheck extends IPSModule
             }
             $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS (count=' . count($fileListIPS) . ')=' . $this->LimitOutput($fileListIPS), 0);
 
+            $ignoreFiles = [];
+            $ignore_files = $this->ReadPropertyString('ignore_files');
+            $fileList = json_decode($ignore_files, true);
+            if ($fileList != false) {
+                foreach ($fileList as $fileEnt) {
+                    $ignoreFiles[] = $fileEnt['filename'];
+                }
+            }
             // Script im Filesystem
             $path = IPS_GetKernelDir() . 'scripts';
             $handle = opendir($path);
@@ -938,7 +984,7 @@ class IntegrityCheck extends IPSModule
                     if (!preg_match('/^.*\.php$/', $file)) {
                         continue;
                     }
-                    if ($file == '__generated.inc.php') {
+                    if (in_array($file, $ignoreFiles)) {
                         continue;
                     }
                 }
@@ -1003,7 +1049,7 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 $file = $script['ScriptFile'];
-                if (in_array($file, $fileListSYS)) {
+                if (in_array($file, $fileListSYS) || file_exists($path . DIRECTORY_SEPARATOR . $file)) {
                     continue;
                 }
                 $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $file]);
@@ -1465,7 +1511,7 @@ class IntegrityCheck extends IPSModule
         return (strcmp($a_msg, $b_msg) < 0) ? -1 : 1;
     }
 
-    public function AddMessageEntry(array &$lst, string $tag, int $id, string $msg, int $level)
+    private function AddMessageEntry(array &$lst, string $tag, int $id, string $msg, int $level)
     {
         $this->SendDebug(__FUNCTION__, 'tag=' . $tag . ', id=' . $id . ', msg=' . $msg . ', level=' . $level, 0);
         $entV = isset($lst[$tag]) ? $lst[$tag] : [];

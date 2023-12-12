@@ -85,13 +85,13 @@ Anschließend erscheint ein Eintrag für das Modul in der Liste der Instanz _Mod
 
 Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als Gerät _Symcon Integrity-Check_ auswählen.
 
-### zentrale Funktion
+## 4. Funktionsreferenz
 
 `boolean IntegrityCheck_PerformCheck(integer $InstanzID)`<br>
 
 `boolean IntegrityCheck_MonitorThreads(integer $InstanzID)`<br>
 
-## 5. Konfiguration:
+## 5. Konfiguration
 
 ### Variablen
 
@@ -134,6 +134,10 @@ GUIDs
   - IntegrityCheck: `{9BC98F5F-A5F1-7980-D9C9-11C29B64F288}`
 
 ## 7. Versions-Historie
+
+- 1.17 @ 12.12.2023 10:26
+  - Neu: Angabe von Dateien im Script-Ordner, die nicht daraufhin geprüft werden, ob sie überflüssig sind ("__generated.inc.php", "__autoload.php")
+  - Neu: PHP-Dateien unterhalb vom Script-Ordner werde nicht mehr als fehlend gekennzeichnet, wenn sie da sind. Grundsätzlich werden nur Dateien betrachtet, die sich im Script-Ordner befinden
 
 - 1.16.2 @ 12.12.2023 09:15
   - Fix: diverse interne Flüchtigkeitsfehler korrigiert
