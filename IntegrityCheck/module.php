@@ -348,7 +348,7 @@ class IntegrityCheck extends IPSModule
                             ]
                         ]
                     ],
-                    'caption' => 'PHP files in or below script to be ignored',
+                    'caption' => 'PHP files to be ignored in or below the script folder',
                 ],
                 [
                     'type'    => 'ValidationTextBox',

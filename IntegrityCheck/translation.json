@@ -33,7 +33,7 @@
 			"Numbers to be ignored": "Zu ignorierende Zahlen",
 			"Numbers": "Zahlen",
 			"Notice": "Notiz",
-			"PHP files in or below script to be ignored": "PHP-Dateien im oder unter dem Skript werden ignoriert",
+			"PHP files to be ignored in or below the script folder": "Zu ignorierende PHP-Dateien im oder unterhalb des Skript-Ordners",
 			"Filename": "Dateiname",
 			"don't check PHP-line with this comment": "PHP-Zeile mit diesem Kommentar nicht prüfen",
 
