@@ -1564,7 +1564,7 @@ class IntegrityCheck extends IPSModule
                 ];
             } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
                 $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
-                $id = (string) $x[1];
+                $id = (int) $x[1];
                 $incFile = @IPS_GetScriptFile($id);
                 if ($incFile == false) {
                     $r[] = [
