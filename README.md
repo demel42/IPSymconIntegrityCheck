@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.18 @ 05.01.2024 15:48
+- 1.18 @ 05.01.2024 16:57
   - Fix: Korrektur zu 1.14 (Ausschluss von Scripten aus der Überwachung der Thread-Laufzeit)
   - update submodule CommonStubs
 
