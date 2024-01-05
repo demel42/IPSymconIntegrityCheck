@@ -1362,6 +1362,20 @@ class IntegrityCheck extends IPSModule
             $threadUsed++;
         }
 
+        // zu ignorierende Script-IDs
+        $ignoreScripts = [];
+        $ignore_scripts = $this->ReadPropertyString('thread_ignore_scripts');
+        $scriptList = json_decode($ignore_scripts, true);
+        if ($ignore_scripts != false) {
+            foreach ($scriptList as $scr) {
+                $sid = $scr['ScriptID'];
+                if (IPS_ScriptExists($sid)) {
+                    $this->RegisterReference($sid);
+                    $ignoreScripts[] = $sid;
+                }
+            }
+        }
+
         $doWarn = true;
         if ($thread_warn_usage > 0) {
             $u = $threadMaxCount / 100 * $thread_warn_usage;
@@ -1399,6 +1413,9 @@ class IntegrityCheck extends IPSModule
 
             $scriptID = $thread['ScriptID'];
             if ($this->IsValidID($scriptID)) {
+                if (in_array($scriptID, $ignoreScripts)) {
+                    continue;
+                }
                 $ident = IPS_GetName($scriptID) . '(' . $scriptID . ')';
                 $s = $this->TranslateFormat('script "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
             } else {

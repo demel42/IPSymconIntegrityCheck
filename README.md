@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.18 @ 05.01.2024 15:48
+  - Fix: Korrektur zu 1.14 (Ausschluss von Scripten aus der Überwachung der Thread-Laufzeit)
+  - update submodule CommonStubs
+
 - 1.17 @ 12.12.2023 10:38
   - Neu: Angabe von Dateien im Script-Ordner, die nicht daraufhin geprüft werden, ob sie überflüssig sind ("__generated.inc.php", "__autoload.php")
   - Neu: PHP-Dateien unterhalb vom Script-Ordner werde nicht mehr als fehlend gekennzeichnet, wenn sie da sind. Grundsätzlich werden nur Dateien betrachtet, die sich im Script-Ordner befinden
