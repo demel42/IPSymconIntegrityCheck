@@ -520,16 +520,8 @@ class IntegrityCheck extends IPSModule
         $counterList = $checkResult['counterList'];
         $messageList = $checkResult['messageList'];
 
-        $scriptTypes = [SCRIPTTYPE_PHP];
-        $scriptTypeNames = ['php script'];
-        if (IPS_GetKernelVersion() >= 6) {
-            $scriptTypes[] = SCRIPTTYPE_FLOW;
-            $scriptTypeNames[] = 'flow plan';
-        }
-        if (IPS_GetKernelVersion() >= 7) {
-            $scriptTypes[] = SCRIPTTYPE_IPSWORKFLOW;
-            $scriptTypeNames[] = 'IPSWorkflow';
-        }
+        $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
+        $scriptTypeNames = ['php script', 'flow plan', 'IPSWorkflow'];
 
         // HTML-Text aufbauen
         $html = '';
@@ -931,18 +923,19 @@ class IntegrityCheck extends IPSModule
         $scriptList = IPS_GetScriptList();
         $scriptIgnored = 0;
         $scriptTypeCount = [];
-        $scriptTypes = [SCRIPTTYPE_PHP];
-        $scriptTypeNames = ['php script'];
-        if (IPS_GetKernelVersion() >= 6) {
-            $scriptTypes[] = SCRIPTTYPE_FLOW;
-            $scriptTypeNames[] = 'flow plan';
-        }
-        if (IPS_GetKernelVersion() >= 7) {
-            $scriptTypes[] = SCRIPTTYPE_IPSWORKFLOW;
-            $scriptTypeNames[] = 'IPSWorkflow';
+        $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
+        $scriptTypeNames = ['php script', 'flow plan', 'IPSWorkflow'];
+        $fileListIPS = [];
+        foreach ($scriptTypes as $scriptType) {
+            foreach ($scriptList as $scriptID) {
+                $script = IPS_GetScript($scriptID);
+                if ($script['ScriptType'] != $scriptType) {
+                    continue;
+                }
+                $fileListIPS[] = $script['ScriptFile'];
+            }
         }
         foreach ($scriptTypes as $scriptType) {
-            $fileListIPS = [];
             $fileListSYS = [];
             $fileListINC = [];
 
@@ -954,7 +947,6 @@ class IntegrityCheck extends IPSModule
                 if ($script['ScriptType'] != $scriptType) {
                     continue;
                 }
-                $fileListIPS[] = $script['ScriptFile'];
                 if (in_array($scriptID, $ignoreObjects)) {
                     $scriptIgnored++;
                     continue;
@@ -983,20 +975,15 @@ class IntegrityCheck extends IPSModule
                     continue;
                 }
                 if ($scriptType == SCRIPTTYPE_PHP) {
-                    if (!preg_match('/^.*\.php$/', $file)) {
+                    if (preg_match('/^.*\.php$/', $file) == false) {
                         continue;
                     }
                     if (in_array($file, $ignoreFiles)) {
                         continue;
                     }
                 }
-                if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOW) {
-                    if (!preg_match('/^.*\.json$/', $file)) {
-                        continue;
-                    }
-                }
-                if (IPS_GetKernelVersion() >= 7 && $scriptType == SCRIPTTYPE_IPSWORKFLOW) {
-                    if (!preg_match('/^.*\.json$/', $file)) {
+                if (in_array($scriptType, [SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW])) {
+                    if (preg_match('/^.*\.json$/', $file) == false) {
                         continue;
                     }
                 }
@@ -1036,7 +1023,6 @@ class IntegrityCheck extends IPSModule
             }
 
             // überflüssige Scripte
-            $scriptError = 0;
             foreach ($fileListSYS as $file) {
                 if (in_array($file, $fileListIPS) || in_array($file, $fileListINC)) {
                     continue;
@@ -1046,7 +1032,6 @@ class IntegrityCheck extends IPSModule
             }
 
             // fehlende Scripte
-            $scriptError = 0;
             foreach ($scriptList as $scriptID) {
                 if (in_array($scriptID, $ignoreObjects)) {
                     continue;
@@ -1090,7 +1075,7 @@ class IntegrityCheck extends IPSModule
                 }
             }
 
-            if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOW) {
+            if ($scriptType == SCRIPTTYPE_FLOW) {
                 foreach ($fileListSYS as $file) {
                     if (!in_array($file, $fileListIPS)) {
                         continue;
@@ -1114,7 +1099,7 @@ class IntegrityCheck extends IPSModule
                 }
             }
 
-            if (IPS_GetKernelVersion() >= 7 && $scriptType == SCRIPTTYPE_IPSWORKFLOW) {
+            if ($scriptType == SCRIPTTYPE_IPSWORKFLOW) {
                 foreach ($fileListSYS as $file) {
                     if (!in_array($file, $fileListIPS)) {
                         continue;

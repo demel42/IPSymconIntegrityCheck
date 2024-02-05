@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.19 @ 05.02.2024 13:42
+- 1.19 @ 05.02.2024 14:45
   - Neu: Anpassung für den neuen ScriptType "IPSWorkflow"
   - update submodule CommonStubs
 
