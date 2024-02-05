@@ -928,75 +928,62 @@ class IntegrityCheck extends IPSModule
         $scriptTypeCount = [];
         $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
         $scriptTypeNames = ['php script', 'flow plan', 'IPSWorkflow'];
+
+        // Script in IPS
         $fileListIPS = [];
-        foreach ($scriptTypes as $scriptType) {
-            foreach ($scriptList as $scriptID) {
-                $script = IPS_GetScript($scriptID);
-                if ($script['ScriptType'] != $scriptType) {
-                    continue;
-                }
-                $fileListIPS[] = $script['ScriptFile'];
+        foreach ($scriptList as $scriptID) {
+            $script = IPS_GetScript($scriptID);
+            $fileListIPS[] = $script['ScriptFile'];
+            if (in_array($scriptID, $ignoreObjects)) {
+                $scriptIgnored++;
+                continue;
+            }
+            $scriptType = $script['ScriptType'];
+            if (isset($scriptTypeCount[$scriptType]) == false) {
+                $scriptTypeCount[$scriptType] = 0;
+            }
+            $scriptTypeCount[$scriptType]++;
+            if ($script['ScriptIsBroken']) {
+                $s = $this->Translate('is faulty');
+                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
             }
         }
+        $this->SendDebug(__FUNCTION__, 'files according to IPS: fileListIPS (count=' . count($fileListIPS) . ')=' . $this->LimitOutput($fileListIPS), 0);
+
+        $ignoreFiles = [];
+        $ignore_files = $this->ReadPropertyString('ignore_files');
+        $fileList = json_decode($ignore_files, true);
+        if ($fileList != false) {
+            foreach ($fileList as $fileEnt) {
+                $ignoreFiles[] = $fileEnt['filename'];
+            }
+        }
+
+        // Script im Filesystem
+        $fileListSYS = [];
+
+        $path = IPS_GetKernelDir() . 'scripts';
+        $handle = opendir($path);
+        while ($file = readdir($handle)) {
+            if (!is_file($path . '/' . $file)) {
+                continue;
+            }
+            if (in_array($file, $ignoreFiles)) {
+                continue;
+            }
+            $fileListSYS[] = $file;
+        }
+        closedir($handle);
+        $this->SendDebug(__FUNCTION__, 'files in filesystem: fileListSYS (count=' . count($fileListSYS) . ')=' . $this->LimitOutput($fileListSYS), 0);
+
+        $fileListINC = [];
         foreach ($scriptTypes as $scriptType) {
-            $fileListSYS = [];
-            $fileListINC = [];
-
-            $scriptTypeCount[$scriptType] = 0;
             $scriptTypeName = $scriptTypeNames[$scriptType];
-
-            foreach ($scriptList as $scriptID) {
-                $script = IPS_GetScript($scriptID);
-                if ($script['ScriptType'] != $scriptType) {
-                    continue;
-                }
-                if (in_array($scriptID, $ignoreObjects)) {
-                    $scriptIgnored++;
-                    continue;
-                }
-                $scriptTypeCount[$scriptType]++;
-                if ($script['ScriptIsBroken']) {
-                    $s = $this->Translate('is faulty');
-                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
-                }
-            }
-            $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from IPS: fileListIPS (count=' . count($fileListIPS) . ')=' . $this->LimitOutput($fileListIPS), 0);
-
-            $ignoreFiles = [];
-            $ignore_files = $this->ReadPropertyString('ignore_files');
-            $fileList = json_decode($ignore_files, true);
-            if ($fileList != false) {
-                foreach ($fileList as $fileEnt) {
-                    $ignoreFiles[] = $fileEnt['filename'];
-                }
-            }
-            // Script im Filesystem
-            $path = IPS_GetKernelDir() . 'scripts';
-            $handle = opendir($path);
-            while ($file = readdir($handle)) {
-                if (!is_file($path . '/' . $file)) {
-                    continue;
-                }
-                if ($scriptType == SCRIPTTYPE_PHP) {
+            if ($scriptType == SCRIPTTYPE_PHP) {
+                foreach ($fileListIPS as $file) {
                     if (preg_match('/^.*\.php$/', $file) == false) {
                         continue;
                     }
-                    if (in_array($file, $ignoreFiles)) {
-                        continue;
-                    }
-                }
-                if (in_array($scriptType, [SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW])) {
-                    if (preg_match('/^.*\.json$/', $file) == false) {
-                        continue;
-                    }
-                }
-                $fileListSYS[] = $file;
-            }
-            closedir($handle);
-            $this->SendDebug(__FUNCTION__, $scriptTypeName . ' from filesystem:: fileListSYS (count=' . count($fileListSYS) . ')=' . $this->LimitOutput($fileListSYS), 0);
-
-            if ($scriptType == SCRIPTTYPE_PHP) {
-                foreach ($fileListIPS as $file) {
                     $text = @file_get_contents($path . '/' . $file);
                     if ($text == false) {
                         $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no content: file=' . $file, 0);
@@ -1023,38 +1010,13 @@ class IntegrityCheck extends IPSModule
                     }
                 }
                 $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include: fileListINC (count=' . count($fileListINC) . ')=' . $this->LimitOutput($fileListINC), 0);
-            }
 
-            // überflüssige Scripte
-            foreach ($fileListSYS as $file) {
-                if (in_array($file, $fileListIPS) || in_array($file, $fileListINC)) {
-                    continue;
-                }
-                $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, 'scripts', 1, $s, self::$LEVEL_INFO);
-            }
-
-            // fehlende Scripte
-            foreach ($scriptList as $scriptID) {
-                if (in_array($scriptID, $ignoreObjects)) {
-                    continue;
-                }
-                $script = IPS_GetScript($scriptID);
-                if ($script['ScriptType'] != $scriptType) {
-                    continue;
-                }
-                $file = $script['ScriptFile'];
-                if (in_array($file, $fileListSYS) || file_exists($path . DIRECTORY_SEPARATOR . $file)) {
-                    continue;
-                }
-                $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $file]);
-                $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
-            }
-
-            if ($scriptType == SCRIPTTYPE_PHP) {
                 // Objekt-ID's in Scripten
                 foreach ($fileListSYS as $file) {
-                    if (!in_array($file, $fileListIPS)) {
+                    if (preg_match('/^.*\.php$/', $file) == false) {
+                        continue;
+                    }
+                    if (in_array($file, $fileListIPS) == false) {
                         continue;
                     }
                     $text = @file_get_contents($path . '/' . $file);
@@ -1078,9 +1040,12 @@ class IntegrityCheck extends IPSModule
                 }
             }
 
-            if ($scriptType == SCRIPTTYPE_FLOW) {
+            if (in_array($scriptType, [SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW])) {
                 foreach ($fileListSYS as $file) {
-                    if (!in_array($file, $fileListIPS)) {
+                    if (preg_match('/^.*\.json$/', $file) == false) {
+                        continue;
+                    }
+                    if (in_array($file, $fileListIPS) == false) {
                         continue;
                     }
                     $text = @file_get_contents($path . '/' . $file);
@@ -1092,31 +1057,40 @@ class IntegrityCheck extends IPSModule
                     if (in_array($scriptID, $ignoreObjects)) {
                         continue;
                     }
-                    $jtext = json_decode($text, true);
-
-                    $this->SendDebug(__FUNCTION__, 'flow-text=' . print_r($jtext, true), 0);
-                    $actions = isset($jtext['actions']) ? $jtext['actions'] : [];
-
-                    $steps = [0];
-                    foreach ($actions as $action) {
-                        $steps[0]++;
-                        $this->decodeAction4FlowScript($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+                    if ($scriptType == SCRIPTTYPE_FLOW) {
+                        $jtext = json_decode($text, true);
+                        $actions = isset($jtext['actions']) ? $jtext['actions'] : [];
+                        $steps = [0];
+                        foreach ($actions as $action) {
+                            $steps[0]++;
+                            $this->decodeAction4FlowScript($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+                        }
                     }
                 }
             }
+        }
 
-            if ($scriptType == SCRIPTTYPE_IPSWORKFLOW) {
-                foreach ($fileListSYS as $file) {
-                    if (!in_array($file, $fileListIPS)) {
-                        continue;
-                    }
-                    $text = @file_get_contents($path . '/' . $file);
-                    if ($text == false) {
-                        $this->SendDebug(__FUNCTION__, $scriptTypeName . ' - no content: file=' . $file, 0);
-                        continue;
-                    }
-                }
+        // überflüssige Scripte
+        foreach ($fileListSYS as $file) {
+            if (in_array($file, $fileListIPS) || in_array($file, $fileListINC)) {
+                continue;
             }
+            $s = $this->TranslateFormat('file "{$file}" is unused', ['{$file}' => $file]);
+            $this->AddMessageEntry($messageList, 'scripts', 1, $s, self::$LEVEL_INFO);
+        }
+
+        // fehlende Scripte
+        foreach ($scriptList as $scriptID) {
+            if (in_array($scriptID, $ignoreObjects)) {
+                continue;
+            }
+            $script = IPS_GetScript($scriptID);
+            $file = $script['ScriptFile'];
+            if (in_array($file, $fileListSYS) || file_exists($path . DIRECTORY_SEPARATOR . $file)) {
+                continue;
+            }
+            $s = $this->TranslateFormat('file "{$file}" is missing', ['{$file}' => $file]);
+            $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
         }
 
         $counterList['scripts'] = [
