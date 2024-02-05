@@ -108,6 +108,7 @@
 			"__function__": "BuildOverview",
 			"php script": "PHP-Skript",
 			"flow plan": "Ablaufplan",
+			"IPSWorkflow": "IPSWorkflow",
 
 			"categories": "Kategorien",
 			"objects": "Objekte",

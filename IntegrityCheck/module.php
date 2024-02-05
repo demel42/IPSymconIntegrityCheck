@@ -523,11 +523,12 @@ class IntegrityCheck extends IPSModule
         $scriptTypes = [SCRIPTTYPE_PHP];
         $scriptTypeNames = ['php script'];
         if (IPS_GetKernelVersion() >= 6) {
-            if (!defined('SCRIPTTYPE_FLOW')) {
-                define('SCRIPTTYPE_FLOW', 1);
-            }
             $scriptTypes[] = SCRIPTTYPE_FLOW;
             $scriptTypeNames[] = 'flow plan';
+        }
+        if (IPS_GetKernelVersion() >= 7) {
+            $scriptTypes[] = SCRIPTTYPE_IPSWORKFLOW;
+            $scriptTypeNames[] = 'IPSWorkflow';
         }
 
         // HTML-Text aufbauen
@@ -933,11 +934,12 @@ class IntegrityCheck extends IPSModule
         $scriptTypes = [SCRIPTTYPE_PHP];
         $scriptTypeNames = ['php script'];
         if (IPS_GetKernelVersion() >= 6) {
-            if (!defined('SCRIPTTYPE_FLOW')) {
-                define('SCRIPTTYPE_FLOW', 1);
-            }
             $scriptTypes[] = SCRIPTTYPE_FLOW;
             $scriptTypeNames[] = 'flow plan';
+        }
+        if (IPS_GetKernelVersion() >= 7) {
+            $scriptTypes[] = SCRIPTTYPE_IPSWORKFLOW;
+            $scriptTypeNames[] = 'IPSWorkflow';
         }
         foreach ($scriptTypes as $scriptType) {
             $fileListIPS = [];
@@ -989,6 +991,11 @@ class IntegrityCheck extends IPSModule
                     }
                 }
                 if (IPS_GetKernelVersion() >= 6 && $scriptType == SCRIPTTYPE_FLOW) {
+                    if (!preg_match('/^.*\.json$/', $file)) {
+                        continue;
+                    }
+                }
+                if (IPS_GetKernelVersion() >= 7 && $scriptType == SCRIPTTYPE_IPSWORKFLOW) {
                     if (!preg_match('/^.*\.json$/', $file)) {
                         continue;
                     }
@@ -1103,6 +1110,19 @@ class IntegrityCheck extends IPSModule
                     foreach ($jtext['actions'] as $action) {
                         $steps[0]++;
                         $this->decodeAction4FlowScript($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
+                    }
+                }
+            }
+
+            if (IPS_GetKernelVersion() >= 7 && $scriptType == SCRIPTTYPE_IPSWORKFLOW) {
+                foreach ($fileListSYS as $file) {
+                    if (!in_array($file, $fileListIPS)) {
+                        continue;
+                    }
+                    $text = @file_get_contents($path . '/' . $file);
+                    if ($text == false) {
+                        $this->SendDebug(__FUNCTION__, $scriptTypeName . ' - no content: file=' . $file, 0);
+                        continue;
                     }
                 }
             }
