@@ -1094,8 +1094,11 @@ class IntegrityCheck extends IPSModule
                     }
                     $jtext = json_decode($text, true);
 
+                    $this->SendDebug(__FUNCTІON__, 'flow-text=' . print_r($jtext, true), 0);
+                    $actions = isset($jtext['actions']) ? $jtext['actions'] : [];
+
                     $steps = [0];
-                    foreach ($jtext['actions'] as $action) {
+                    foreach ($actions as $action) {
                         $steps[0]++;
                         $this->decodeAction4FlowScript($action, $steps, 0, $scriptID, $scriptTypeName, $messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS);
                     }
