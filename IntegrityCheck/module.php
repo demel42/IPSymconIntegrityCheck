@@ -556,6 +556,9 @@ class IntegrityCheck extends IPSModule
                     $s = '';
                     if (IPS_GetKernelVersion() >= 6) {
                         foreach ($scriptTypes as $scriptType) {
+                            if ($counters['types'][$scriptType] == 0) {
+                                continue;
+                            }
                             if ($s != '') {
                                 $s .= ', ';
                             }
