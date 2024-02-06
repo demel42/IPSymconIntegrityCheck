@@ -554,19 +554,18 @@ class IntegrityCheck extends IPSModule
                     break;
                 case 'scripts':
                     $s = '';
-                    if (IPS_GetKernelVersion() >= 6) {
-                        foreach ($scriptTypes as $scriptType) {
-                            if ($counters['types'][$scriptType] == 0) {
-                                continue;
-                            }
-                            if ($s != '') {
-                                $s .= ', ';
-                            }
-                            $scriptTypeName = $scriptTypeNames[$scriptType];
-                            $s .= $this->Translate($scriptTypeName) . '=' . $counters['types'][$scriptType];
+                    $this->SendDebug(__FUNCTION__, 'counters=' . print_r($counters, true), 0);
+                    foreach ($scriptTypes as $scriptType) {
+                        if ($counters['types'][$scriptType] == 0) {
+                            continue;
                         }
-                        $s = ' (' . $s . ')';
+                        if ($s != '') {
+                            $s .= ', ';
+                        }
+                        $scriptTypeName = $scriptTypeNames[$scriptType];
+                        $s .= $this->Translate($scriptTypeName) . '=' . $counters['types'][$scriptType];
                     }
+                    $s = ' (' . $s . ')';
                     break;
                 case 'variables':
                     $s = ' (' . $this->Translate('unused') . '=' . $counters['unused'] . ')';
