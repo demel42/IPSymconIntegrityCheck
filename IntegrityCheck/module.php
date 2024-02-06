@@ -925,9 +925,12 @@ class IntegrityCheck extends IPSModule
         // Scripte
         $scriptList = IPS_GetScriptList();
         $scriptIgnored = 0;
-        $scriptTypeCount = [];
         $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
         $scriptTypeNames = ['php script', 'flow plan', 'IPSWorkflow'];
+        $scriptTypeCount = [];
+        foreach ($scriptTypes as $scriptType) {
+            $scriptTypeCount[$scriptType] = 0;
+        }
 
         // Script in IPS
         $fileListIPS = [];
@@ -939,9 +942,6 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             $scriptType = $script['ScriptType'];
-            if (isset($scriptTypeCount[$scriptType]) == false) {
-                $scriptTypeCount[$scriptType] = 0;
-            }
             $scriptTypeCount[$scriptType]++;
             if ($script['ScriptIsBroken']) {
                 $s = $this->Translate('is faulty');
