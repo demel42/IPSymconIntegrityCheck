@@ -335,7 +335,7 @@ class IntegrityCheck extends IPSModule
                             'add'      => '',
                             'edit'     => [
                                 'type'     => 'ValidationTextBox',
-                                'validate' => '^.*\.php$',
+                                // 'validate' => '^.*\.php$',
                             ]
                         ],
                         [
@@ -554,7 +554,6 @@ class IntegrityCheck extends IPSModule
                     break;
                 case 'scripts':
                     $s = '';
-                    $this->SendDebug(__FUNCTION__, 'counters=' . print_r($counters, true), 0);
                     foreach ($scriptTypes as $scriptType) {
                         if ($counters['types'][$scriptType] == 0) {
                             continue;
