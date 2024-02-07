@@ -135,8 +135,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.19.2 @ 07.02.2024 14:52
+  - Fix: weitere Absicherung zu 1.19.1
+
 - 1.19.1 @ 06.02.2024 09:53
-  - Fix: Fehler in V1.19 korrigiert
+  - Fix: Fehler aus 1.19 korrigiert
 
 - 1.19 @ 05.02.2024 17:27
   - Neu: Anpassung für den neuen ScriptType "IPSWorkflow"

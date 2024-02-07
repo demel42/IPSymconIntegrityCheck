@@ -554,15 +554,15 @@ class IntegrityCheck extends IPSModule
                     break;
                 case 'scripts':
                     $s = '';
-                    foreach ($scriptTypes as $scriptType) {
-                        if ($counters['types'][$scriptType] == 0) {
+                    foreach ($counters['types'] as $scriptType => $count) {
+                        if ($count == 0) {
                             continue;
                         }
                         if ($s != '') {
                             $s .= ', ';
                         }
                         $scriptTypeName = $scriptTypeNames[$scriptType];
-                        $s .= $this->Translate($scriptTypeName) . '=' . $counters['types'][$scriptType];
+                        $s .= $this->Translate($scriptTypeName) . '=' . $count;
                     }
                     $s = ' (' . $s . ')';
                     break;
