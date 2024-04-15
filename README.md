@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.20 @ 15.04.2024 11:28
+  - Fix: Schreibfehler korrigiert
+  - update submodule CommonStubs
+
 - 1.19.2 @ 07.02.2024 14:52
   - Fix: weitere Absicherung zu 1.19.1
 
