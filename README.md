@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.21 @ 26.07.2024 11:12
+- 1.21 @ 26.07.2024 18:11
   - Fix: gültige Objekt-ID's habe nur Werte von >= 10000 bis <= 59999
   - Änderung: "IPSWorkflow" in "Logikplan" umbenannt
   - update submodule CommonStubs

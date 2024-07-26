@@ -1537,9 +1537,9 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             $patternV = [
-                '/[^!=><]=[\t ]*([0-9]{5})[^0-9]/',
-                '/[\t ]*=[\t ]*([0-9]{5})[^0-9]/',
-                '/\([\t ]*([0-9]{5})[^0-9]/',
+                '/[^!=><]=[\t ]*([1-5][0-9]{4})[^0-9]/',
+                '/[\t ]*=[\t ]*([1-5][0-9]{4})[^0-9]/',
+                '/\([\t ]*([1-5][0-9]{4})[^0-9]/',
             ];
             foreach ($patternV as $pattern) {
                 if (preg_match_all($pattern, $line, $r)) {
