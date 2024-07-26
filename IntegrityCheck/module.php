@@ -14,7 +14,7 @@ class IntegrityCheck extends IPSModule
     {
         parent::__construct($InstanceID);
 
-        $this->CommonContruct(__DIR__);
+        $this->CommonConstruct(__DIR__);
     }
 
     public function __destruct()
@@ -521,7 +521,7 @@ class IntegrityCheck extends IPSModule
         $messageList = $checkResult['messageList'];
 
         $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
-        $scriptTypeNames = ['php script', 'flow plan', 'IPSWorkflow'];
+        $scriptTypeNames = ['php script', 'flow plan', 'logic plan'];
 
         // HTML-Text aufbauen
         $html = '';
@@ -924,7 +924,7 @@ class IntegrityCheck extends IPSModule
         $scriptList = IPS_GetScriptList();
         $scriptIgnored = 0;
         $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
-        $scriptTypeNames = ['php script', 'flow plan', 'IPSWorkflow'];
+        $scriptTypeNames = ['php script', 'flow plan', 'logic plan'];
         $scriptTypeCount = [];
         foreach ($scriptTypes as $scriptType) {
             $scriptTypeCount[$scriptType] = 0;
