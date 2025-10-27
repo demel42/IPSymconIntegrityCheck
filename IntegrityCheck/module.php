@@ -603,17 +603,17 @@ class IntegrityCheck extends IPSModule
             foreach ($entries as $entry) {
                 $lvl = $entry['Level'];
                 switch ($lvl) {
-                        case self::$LEVEL_INFO:
-                            $col = 'grey';
-                            break;
-                        case self::$LEVEL_WARN:
-                            $col = 'gold';
-                            break;
-                        case self::$LEVEL_ERROR:
-                        default:
-                            $col = 'red';
-                            break;
-                    }
+                    case self::$LEVEL_INFO:
+                        $col = 'grey';
+                        break;
+                    case self::$LEVEL_WARN:
+                        $col = 'gold';
+                        break;
+                    case self::$LEVEL_ERROR:
+                    default:
+                        $col = 'red';
+                        break;
+                }
                 $html .= '<span style="color: ' . $col . ';">&nbsp;&nbsp;&nbsp;';
                 $id = $entry['ID'];
                 if ($this->IsValidID($id) && IPS_ObjectExists($id)) {
@@ -801,6 +801,21 @@ class IntegrityCheck extends IPSModule
             }
         }
 
+        $ignoreRemote = [];
+        $data = IPS_GetSnapshot();
+        $jdata = json_decode($data, true);
+        if (isset($jdata['sync'])) {
+            foreach ($jdata['sync'] as $inst_k => $inst_v) {
+                if (preg_match('/^ID([0-9]{5})$/', $inst_k, $x)) {
+                    $ignoreObjects[] = $x[1];
+                    foreach ($inst_v as $k => $v) {
+                        $ignoreObjects[] = $v;
+                        $ignoreRemote[] = $v;
+                    }
+                }
+            }
+        }
+
         $this->SendDebug(__FUNCTION__, 'ignoreObjects=' . print_r($ignoreObjects, true), 0);
 
         // zu ignorierende Zahlen
@@ -968,6 +983,11 @@ class IntegrityCheck extends IPSModule
             }
             if (in_array($file, $ignoreFiles)) {
                 continue;
+            }
+            if (preg_match('/^([0-9]{5}).ips.(php|json)$/', $file, $x)) {
+                if (in_array($x[1], $ignoreRemote)) {
+                    continue;
+                }
             }
             $fileListSYS[] = $file;
         }

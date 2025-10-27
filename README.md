@@ -135,6 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.23 @ 27.10.2025 15:27
+  - Fix: Objekte und Dateien ignorieren, die von "Sync Remote" angelegt wurden
+
 - 1.22 @ 02.01.2025 14:28
   - Fix: Link zur Dokumentation korrigiert
   - update submodule CommonStubs
