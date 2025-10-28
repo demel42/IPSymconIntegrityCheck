@@ -801,21 +801,13 @@ class IntegrityCheck extends IPSModule
             }
         }
 
-        $ignoreRemote = [];
-        $data = IPS_GetSnapshot();
-        $jdata = json_decode($data, true);
-        if (isset($jdata['sync'])) {
-            foreach ($jdata['sync'] as $inst_k => $inst_v) {
-                if (preg_match('/^ID([0-9]{5})$/', $inst_k, $x)) {
-                    $ignoreObjects[] = $x[1];
-                    foreach ($inst_v as $k => $v) {
-                        $ignoreObjects[] = $v;
-                        $ignoreRemote[] = $v;
-                    }
-                }
+        $instIDs = IPS_GetInstanceListByModuleID('{C8A197F4-7BDF-41E4-AB15-FA59CD417FEA}'); // Sync Remote
+        if ($instIDs != false) {
+            foreach ($instIDs as $instID) {
+                $ignoreObjects[] = $instID;
+                $this->GetAllChildenIDs($instID, $ignoreObjects);
             }
         }
-
         $this->SendDebug(__FUNCTION__, 'ignoreObjects=' . print_r($ignoreObjects, true), 0);
 
         // zu ignorierende Zahlen
@@ -985,7 +977,7 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             if (preg_match('/^([0-9]{5}).ips.(php|json)$/', $file, $x)) {
-                if (in_array($x[1], $ignoreRemote)) {
+                if (in_array($x[1], $ignoreObjects)) {
                     continue;
                 }
             }
