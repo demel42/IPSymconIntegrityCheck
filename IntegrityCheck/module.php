@@ -60,6 +60,8 @@ class IntegrityCheck extends IPSModule
         $this->RegisterAttributeString('UpdateInfo', json_encode([]));
         $this->RegisterAttributeString('ModuleStats', json_encode([]));
 
+        $this->SetBuffer('checkResult', json_encode([]));
+
         $this->InstallVarProfiles(false);
 
         $this->RegisterTimer('PerformCheck', 0, 'IPS_RequestAction(' . $this->InstanceID . ', "PerformCheck", "");');
@@ -461,6 +463,12 @@ class IntegrityCheck extends IPSModule
             'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "PerformCheck", "");',
         ];
 
+        $formActions[] = [
+            'type'    => 'Button',
+            'caption' => 'Show overview',
+            'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "ShowOverview", "");',
+        ];
+
         $formActions[] = $this->GetInformationFormAction();
         $formActions[] = $this->GetReferencesFormAction();
 
@@ -476,6 +484,9 @@ class IntegrityCheck extends IPSModule
                 break;
             case 'MonitorThreads':
                 $this->MonitorThreads();
+                break;
+            case 'ShowOverview':
+                $this->ShowOverview();
                 break;
             default:
                 $r = false;
@@ -1470,6 +1481,8 @@ class IntegrityCheck extends IPSModule
             'infoCount'    => $infoCount,
         ];
 
+        $this->SetBuffer('checkResult', json_encode($checkResult));
+
         $html = $this->BuildOverview($checkResult);
         $this->SetValue('Overview', $html);
 
@@ -1832,5 +1845,101 @@ class IntegrityCheck extends IPSModule
                 $this->SetValue('LastUpdate', $now);
             }
         }
+    }
+
+    private function ShowOverview()
+    {
+        $checkResult = json_decode((string) $this->GetBuffer('checkResult'), true);
+
+        $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
+        $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');
+        $thread_limit_error = $this->ReadPropertyInteger('thread_limit_error');
+
+        $tstamp = $checkResult['timestamp'];
+        $counterList = $checkResult['counterList'];
+        $messageList = $checkResult['messageList'];
+
+        $scriptTypes = [SCRIPTTYPE_PHP, SCRIPTTYPE_FLOW, SCRIPTTYPE_IPSWORKFLOW];
+        $scriptTypeNames = ['php script', 'flow plan', 'logic plan'];
+
+        $txt = $this->Translate('Timestamp') . ': ' . date('d.m.Y H:i:s', $tstamp) . PHP_EOL;
+        $txt .= PHP_EOL;
+
+        foreach ($counterList as $tag => $counters) {
+            $total = $counters['total'];
+            switch ($tag) {
+                case 'timer':
+                    $s = ' (1m=' . $counters['1min'] . ', 5m=' . $counters['5min'] . ')';
+                    break;
+                case 'instances':
+                    $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
+                    break;
+                case 'scripts':
+                    $s = '';
+                    foreach ($counters['types'] as $scriptType => $count) {
+                        if ($count == 0) {
+                            continue;
+                        }
+                        if ($s != '') {
+                            $s .= ', ';
+                        }
+                        $scriptTypeName = $scriptTypeNames[$scriptType];
+                        $s .= $this->Translate($scriptTypeName) . '=' . $count;
+                    }
+                    $s = ' (' . $s . ')';
+                    break;
+                case 'variables':
+                    $s = ' (' . $this->Translate('unused') . '=' . $counters['unused'] . ')';
+                    break;
+                case 'events':
+                    $s = ' (' . $this->Translate('active') . '=' . $counters['active'] . ')';
+                    break;
+                case 'threads':
+                    $s = ' (' . $this->Translate('used') . '=' . $counters['used'];
+                    if ($counters['error']) {
+                        $s .= ', >' . $thread_limit_error . 's=' . $counters['error'];
+                    }
+                    if ($counters['warn']) {
+                        $s .= ', >' . $thread_limit_warn . 's=' . $counters['warn'];
+                    }
+                    if ($counters['info']) {
+                        $s .= ', >' . $thread_limit_info . 's=' . $counters['info'];
+                    }
+                    $s .= ')';
+                    break;
+                default:
+                    $s = '';
+                    break;
+            }
+            $txt .= $this->Translate($tag) . ': ' . $total . $s . PHP_EOL;
+        }
+
+        $txt .= PHP_EOL;
+        $n_messages = 0;
+        foreach ($messageList as $tag => $entries) {
+            if ($entries == []) {
+                continue;
+            }
+            $n_messages++;
+            $txt .= $this->Translate($tag) . ': ' . PHP_EOL;
+            foreach ($entries as $entry) {
+                $id = $entry['ID'];
+                if ($this->IsValidID($id) && IPS_ObjectExists($id)) {
+                    $txt .= '  #' . $id;
+                    $loc = @IPS_GetLocation($id);
+                    if ($loc != false) {
+                        $txt .= '(' . $loc . ')';
+                    }
+                    $txt .= ': ';
+                }
+                $txt .= $entry['Msg'];
+                $txt .= PHP_EOL;
+            }
+            $txt .= PHP_EOL;
+        }
+        if ($n_messages == 0) {
+            $txt .= $this->Translate('no abnormalities') . PHP_EOL;
+        }
+        $this->PopupMessage($txt);
     }
 }

@@ -135,6 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.24 @ 17.11.2025 17:04
+  - Verbesserung: Funktion "Übersicht anzeigen" im Aktionsbereich zur Anzeige der aktuelle Ergebnisse als Popup
+  - update submodule CommonStubs
+
 - 1.23 @ 28.10.2025 12:11
   - Fix: Objekte und Dateien ignorieren, die von "Sync Remote" angelegt wurden
 
