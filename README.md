@@ -117,7 +117,7 @@ Nun _Instanz hinzufügen_ anwählen und als Hersteller _(sonstiges)_ sowie als G
 
 - *... Zahlen*
 die hier angegebenen 5-stelligen Zahlen werden bei der Prüfung von Scripten nicht als Objekt-ID's behandelt und geprüft.
-Die Spalte *Notiz* ist nur optional und als Hiweis, wo si h die Zehl befindet bzw die Bedeutung
+Die Spalte *Notiz* ist nur optional und als Hiweis, wo sich die Zahl befindet bzw die Bedeutung
 
 - *Objekte unterhalb der Kategorie*
 alle Objekte unterhalb der angegebenen Kategorie werden ignoriert, dabei werden Verknüpfungen *nicht* gefolgt.
@@ -135,8 +135,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.24 @ 17.11.2025 17:04
+- 1.24 @ 27.03.2026 14:12
   - Verbesserung: Funktion "Übersicht anzeigen" im Aktionsbereich zur Anzeige der aktuelle Ergebnisse als Popup
+  - Fix: Anpassung für IPS 9
+  - interne Änderung
   - update submodule CommonStubs
 
 - 1.23 @ 28.10.2025 12:11

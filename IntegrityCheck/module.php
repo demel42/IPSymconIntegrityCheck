@@ -650,12 +650,12 @@ class IntegrityCheck extends IPSModule
 
     private function decodeAction4Event($actionID, $actionParameters, $eventID, $eventTypeName, &$messageList, $objectList, $ignoreNums, $fileListINC, $fileListIPS)
     {
-        $this->SendDebug(__FUNCTION__, 'event=' . IPS_GetName($eventID) . '(' . $eventID . '), actionID=' . $actionID . ', actionParameters=' . print_r($actionParameters, true), 0);
+        // $this->SendDebug(__FUNCTION__, 'event=' . IPS_GetName($eventID) . '(' . $eventID . '), actionID=' . $actionID . ', actionParameters=' . print_r($actionParameters, true), 0);
 
         if (isset($actionParameters['VARIABLE'])) {
             $varID = intval($actionParameters['VARIABLE']);
             if ($this->IsValidID($varID) && IPS_VariableExists($varID) == false) {
-                $this->SendDebug(__FUNCTION__, $eventTypeName . ' - variable ' . $varID . ' doesn\'t exists', 0);
+                // $this->SendDebug(__FUNCTION__, $eventTypeName . ' - variable ' . $varID . ' doesn\'t exists', 0);
                 $s = $this->TranslateFormat($eventTypeName . ' - variable {$varID} doesn\'t exists', ['{$varID}' => $varID]);
                 $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
             }
@@ -663,7 +663,7 @@ class IntegrityCheck extends IPSModule
         if (isset($actionParameters['SCRIPT'])) {
             $file = 'Action #' . $eventID;
             $text = $actionParameters['SCRIPT'];
-            $this->SendDebug(__FUNCTION__, 'script=' . $text, 0);
+            // $this->SendDebug(__FUNCTION__, 'script=' . $text, 0);
             $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
             foreach ($ret as $r) {
                 $row = $r['row'];
@@ -700,13 +700,13 @@ class IntegrityCheck extends IPSModule
             }
             $step .= strval($steps[$l]);
         }
-        $this->SendDebug(__FUNCTION__, $scriptTypeName . '/script=' . IPS_GetName($scriptID) . '(' . $scriptID . '), step=' . $step . ', action=' . print_r($action, true), 0);
+        // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/script=' . IPS_GetName($scriptID) . '(' . $scriptID . '), step=' . $step . ', action=' . print_r($action, true), 0);
 
         if (isset($action['parameters']['TARGET'])) {
             $objID = intval($action['parameters']['TARGET']);
             if ($objID != -1) {
                 if ($this->IsValidID($objID) && IPS_ObjectExists($objID) == false) {
-                    $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - object ' . $objID . ' doesn\'t exists', 0);
+                    // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - object ' . $objID . ' doesn\'t exists', 0);
                     $s = $this->TranslateFormat('flow plan step {$step} - target {$objID} doesn\'t exists', ['{$step}' => $step, '{$objID}' => $objID]);
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 }
@@ -716,7 +716,7 @@ class IntegrityCheck extends IPSModule
         if (isset($action['parameters']['VARIABLE'])) {
             $varID = intval($action['parameters']['VARIABLE']);
             if ($this->IsValidID($varID) && IPS_VariableExists($varID) == false) {
-                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - variable ' . $varID . ' doesn\'t exists', 0);
+                // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - variable ' . $varID . ' doesn\'t exists', 0);
                 $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                 $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
             }
@@ -728,17 +728,17 @@ class IntegrityCheck extends IPSModule
                 foreach ($conditions as $condition) {
                     $vars = $condition['rules']['variable'];
                     foreach ($vars as $var) {
-                        $this->SendDebug(__FUNCTION__, $scriptTypeName . '/var=' . print_r($var, true), 0);
+                        // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/var=' . print_r($var, true), 0);
                         $varID = $this->GetArrayElem($var, 'variableID', 0);
                         if ($this->IsValidID($varID) && IPS_VariableExists($varID) == false) {
-                            $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
+                            // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
                             $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                             $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                         }
                         if ($this->GetArrayElem($var, 'type', 0) == 1 /* compare with variable */) {
                             $varID = $var['value'];
                             if ($this->IsValidID($varID) && IPS_VariableExists($varID) == false) {
-                                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
+                                // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/action step=' . $step . ' - condition/variable ' . $varID . ' doesn\'t exists', 0);
                                 $s = $this->TranslateFormat('flow plan step {$step} - variable {$varID} doesn\'t exists', ['{$step}' => $step, '{$varID}' => $varID]);
                                 $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                             }
@@ -1007,7 +1007,7 @@ class IntegrityCheck extends IPSModule
                     }
                     $text = @file_get_contents($path . '/' . $file);
                     if ($text == false) {
-                        $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no content: file=' . $file, 0);
+                        // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no content: file=' . $file, 0);
                         continue;
                     }
                     $scriptID = @IPS_GetScriptIDByFile($file);
@@ -1030,7 +1030,7 @@ class IntegrityCheck extends IPSModule
                         }
                     }
                 }
-                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include: fileListINC (count=' . count($fileListINC) . ')=' . $this->LimitOutput($fileListINC), 0);
+                // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include: fileListINC (count=' . count($fileListINC) . ')=' . $this->LimitOutput($fileListINC), 0);
 
                 // Objekt-ID's in Scripten
                 foreach ($fileListSYS as $file) {
@@ -1042,7 +1042,7 @@ class IntegrityCheck extends IPSModule
                     }
                     $text = @file_get_contents($path . '/' . $file);
                     if ($text == false) {
-                        $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-id - no content: file=' . $file, 0);
+                        // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/object-id - no content: file=' . $file, 0);
                         continue;
                     }
                     $scriptID = @IPS_GetScriptIDByFile($file);
@@ -1071,7 +1071,7 @@ class IntegrityCheck extends IPSModule
                     }
                     $text = @file_get_contents($path . '/' . $file);
                     if ($text == false) {
-                        $this->SendDebug(__FUNCTION__, $scriptTypeName . ' - no content: file=' . $file, 0);
+                        // $this->SendDebug(__FUNCTION__, $scriptTypeName . ' - no content: file=' . $file, 0);
                         continue;
                     }
                     $scriptID = @IPS_GetScriptIDByFile($file);
@@ -1515,7 +1515,7 @@ class IntegrityCheck extends IPSModule
         $post_script = $this->ReadPropertyInteger('post_script');
         if (IPS_ScriptExists($post_script)) {
             $ret = IPS_RunScriptEx($post_script, ['InstanceID' => $this->InstanceID, 'CheckResult' => json_encode($checkResult)]);
-            $this->SendDebug(__FUNCTION__, 'call script ' . IPS_GetParent($post_script) . '\\' . IPS_GetName($post_script) . ', ret=' . $ret, 0);
+            // $this->SendDebug(__FUNCTION__, 'call script ' . IPS_GetParent($post_script) . '\\' . IPS_GetName($post_script) . ', ret=' . $ret, 0);
         }
     }
 
@@ -1538,7 +1538,7 @@ class IntegrityCheck extends IPSModule
 
     private function AddMessageEntry(array &$lst, string $tag, int $id, string $msg, int $level)
     {
-        $this->SendDebug(__FUNCTION__, 'tag=' . $tag . ', id=' . $id . ', msg=' . $msg . ', level=' . $level, 0);
+        // $this->SendDebug(__FUNCTION__, 'tag=' . $tag . ', id=' . $id . ', msg=' . $msg . ', level=' . $level, 0);
         $entV = isset($lst[$tag]) ? $lst[$tag] : [];
         $entV[] = [
             'ID'    => $id,
@@ -1569,7 +1569,7 @@ class IntegrityCheck extends IPSModule
             foreach ($patternV as $pattern) {
                 if (preg_match_all($pattern, $line, $r)) {
                     foreach ($r[1] as $id) {
-                        $this->SendDebug(__FUNCTION__, 'script/object-id - match#1 id=' . $id . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                        // $this->SendDebug(__FUNCTION__, 'script/object-id - match#1 id=' . $id . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                         if (in_array($id, $ignoreNums)) {
                             continue;
                         }
@@ -1618,7 +1618,7 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
             if (preg_match('/^[\t ]*[\'"]([^\'"]*)[\'"][\t ]*$/', $a, $x)) {
-                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#1 file=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#1 file=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                 $incFile = $x[1];
                 if (!in_array($incFile, $fileListINC)) {
                     $fileListINC[] = $incFile;
@@ -1634,7 +1634,7 @@ class IntegrityCheck extends IPSModule
                     'file' => $incFile,
                 ];
             } elseif (preg_match('/IPS_GetScriptFile[\t ]*\([\t ]*([0-9]{5})[\t ]*\)/', $a, $x)) {
-                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - match#2 id=' . $x[1] . ': file=' . $file . ', line=' . $this->LimitOutput($line), 0);
                 $id = (int) $x[1];
                 $incFile = @IPS_GetScriptFile($id);
                 if ($incFile == false) {
@@ -1648,7 +1648,7 @@ class IntegrityCheck extends IPSModule
                     }
                 }
             } else {
-                $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no match: file=' . $file . ', line=' . $this->LimitOutput($line), 0);
+                // $this->SendDebug(__FUNCTION__, $scriptTypeName . '/include - no match: file=' . $file . ', line=' . $this->LimitOutput($line), 0);
             }
         }
         return $ret;
@@ -1734,7 +1734,7 @@ class IntegrityCheck extends IPSModule
                 continue;
             }
 
-            $this->SendDebug(__FUNCTION__, 'thread #' . $i . '=' . print_r($thread, true), 0);
+            // $this->SendDebug(__FUNCTION__, 'thread #' . $i . '=' . print_r($thread, true), 0);
 
             $sec = $now - $startTime;
 
@@ -1774,6 +1774,7 @@ class IntegrityCheck extends IPSModule
                 if ($checkResult != false) {
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
                 }
+                $this->SendDebug(__FUNCTION__, 'thread.error=' . print_r($thread, true), 0);
                 if ($monitor_with_logging) {
                     $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_ERROR);
                 }
@@ -1782,11 +1783,13 @@ class IntegrityCheck extends IPSModule
                 if ($checkResult != false) {
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_WARN);
                 }
+                $this->SendDebug(__FUNCTION__, 'thread.warn=' . print_r($thread, true), 0);
                 if ($monitor_with_logging) {
                     $this->LogMessage(__FUNCTION__ . ': ' . $m, KL_WARNING);
                 }
             } elseif ($sec >= $thread_limit_info) {
                 $threadInfo++;
+                $this->SendDebug(__FUNCTION__, 'thread.info=' . print_r($thread, true), 0);
                 if ($checkResult != false) {
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_INFO);
                 }
@@ -1850,6 +1853,11 @@ class IntegrityCheck extends IPSModule
     private function ShowOverview()
     {
         $checkResult = json_decode((string) $this->GetBuffer('checkResult'), true);
+        if ($checkResult == []) {
+            $txt = $this->Translate('no data available yet') . PHP_EOL;
+            $this->PopupMessage($txt);
+            return;
+        }
 
         $thread_limit_info = $this->ReadPropertyInteger('thread_limit_info');
         $thread_limit_warn = $this->ReadPropertyInteger('thread_limit_warn');

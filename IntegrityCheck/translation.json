@@ -128,8 +128,9 @@
 			"unused": "nicht verwendet",
 
 			"Timestamp": "Zeitpunkt",
-			"no abnormalities": "keine Auffälligkeiten",
 
+			"no data available yet": "bislang keine Daten verfügbar",
+			"no abnormalities": "keine Auffälligkeiten",
 			"found {$errorCount} errors, {$warnCount} warnings and {$infoCount} informations":
 				"{$errorCount} Fehler, {$warnCount} Warnungen und {$infoCount} Informationen gefunden",
 
