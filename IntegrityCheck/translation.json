@@ -101,6 +101,8 @@
 			"user profile \"{$variableCustomProfile}\" doesn't exists": "Benutzerprofil \"{$variableCustomProfile}\" existiert nicht",
 			"user profile \"{$variableCustomProfile}\" has wrong type": "Benutzerprofil \"{$variableCustomProfile}\" hat falschen Typ",
 
+			"called by \"{$sender}\"": "aufgerufen von \"{$sender}\"",
+
 			"is not yet saved": "ist noch nicht gespeichert",
 			"is unused": "wird nicht verwendet",
 

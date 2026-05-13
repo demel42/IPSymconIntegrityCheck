@@ -812,7 +812,7 @@ class IntegrityCheck extends IPSModule
             }
         }
 
-        $instIDs = IPS_GetInstanceListByModuleID('{C8A197F4-7BDF-41E4-AB15-FA59CD417FEA}'); // Sync Remote
+        $instIDs = (array) IPS_GetInstanceListByModuleID('{C8A197F4-7BDF-41E4-AB15-FA59CD417FEA}'); // Sync Remote
         if ($instIDs != false) {
             foreach ($instIDs as $instID) {
                 $ignoreObjects[] = $instID;
@@ -1429,6 +1429,16 @@ class IntegrityCheck extends IPSModule
                 $s = $this->TranslateFormat('function "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
             }
 
+            if (isset($thread['SenderID'])) {
+                $senderID = $thread['SenderID'];
+                if ($this->IsValidID($senderID) && $senderID != $scriptID) {
+                    $sender = IPS_GetName($senderID) . '(' . $senderID . ')';
+                    $s .= ' ' . $this->TranslateFormat('called by "{$sender}"', ['{$sender}' => $sender]);
+                }
+            }
+
+            $this->SendDebug(__FUNCTION__, $s, 0);
+
             if ($sec >= $thread_limit_error) {
                 $threadError++;
                 $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_ERROR);
@@ -1753,9 +1763,15 @@ class IntegrityCheck extends IPSModule
                 $i = floor($i);
             }
 
-            $sender = $thread['Sender'];
             $threadId = $thread['ThreadID'];
             $scriptID = $thread['ScriptID'];
+            $sender = $thread['Sender'];
+            if (isset($thread['SenderID'])) {
+                $senderID = $thread['SenderID'];
+                if ($this->IsValidID($senderID) && $senderID != $scriptID) {
+                    $sender .= ', senderID=' . $senderID;
+                }
+            }
             if ($this->IsValidID($scriptID)) {
                 if (in_array($scriptID, $ignoreScripts)) {
                     continue;
@@ -1768,6 +1784,17 @@ class IntegrityCheck extends IPSModule
                 $s = $this->TranslateFormat('function "{$ident}" is running since {$duration}', ['{$ident}' => $ident, '{$duration}' => $duration]);
                 $m = 'thread=' . $threadId . ', function=' . $ident . ', sender=' . $sender . ', duration=' . $duration;
             }
+
+            if (isset($thread['SenderID'])) {
+                $senderID = $thread['SenderID'];
+                if ($this->IsValidID($senderID) && $senderID != $scriptID) {
+                    $sender = IPS_GetName($senderID) . '(' . $senderID . ')';
+                    $s .= ' ' . $this->TranslateFormat('called by "{$sender}"', ['{$sender}' => $sender]);
+                }
+            }
+
+            $this->SendDebug(__FUNCTION__, $s, 0);
+            $this->SendDebug(__FUNCTION__, $m, 0);
 
             if ($sec >= $thread_limit_error) {
                 $threadError++;
@@ -1794,7 +1821,6 @@ class IntegrityCheck extends IPSModule
                     $this->AddMessageEntry($messageList, 'threads', 0, $s, self::$LEVEL_INFO);
                 }
             }
-            $this->SendDebug(__FUNCTION__, $m, 0);
         }
 
         if ($checkResult != false) {

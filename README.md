@@ -135,6 +135,13 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.26 @ 09.05.2026 11:36
+  - Fix: Änderung von deprecated php code
+  - update submodule CommonStubs
+
+- 1.25 @ 30.04.2026 18:10
+  - Verbesserung: ab IPS 9 wird bei den Threads auch eine "SenderID" ausgewiesen, die im Rahmen der Thread-Überwachung ausgewiesen wird
+
 - 1.24 @ 27.03.2026 14:12
   - Verbesserung: Funktion "Übersicht anzeigen" im Aktionsbereich zur Anzeige der aktuelle Ergebnisse als Popup
   - Fix: Anpassung für IPS 9
