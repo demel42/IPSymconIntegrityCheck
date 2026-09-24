@@ -135,6 +135,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.27 @ 24.09.2026 14:44
+  - Fix: IPS 9 - Ereignis-Aktionen können nun auch den Verweis von eine Script-ID enthalten anstelle des Scriptes selber
+
 - 1.26 @ 09.05.2026 11:36
   - Fix: Änderung von deprecated php code
   - update submodule CommonStubs

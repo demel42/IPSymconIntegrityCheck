@@ -72,11 +72,13 @@
 			"event action, script row {$row} - a object with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
 			"event action, script row {$row} - file \"{$file}\" is missing": "Ereignis-Aktion, Zeile {$row} - Datei \"{$file}\" fehlt",
 			"event action, script row {$row} - script with ID {$id} doesn't exists": "Ereignis-Aktion, Zeile {$row} - Skript mit ID {$id} existiert nicht",
+			"event action - script with ID {$id} doesn't exists": "Ereignis-Aktion - Skript mit ID {$id} existiert nicht",
 
 			"schedule action - variable {$varID} doesn't exists": "Wochenplan-Aktion - Variable {$varID} existiert nicht",
 			"schedule action, script row {$row} - a object with ID {$id} doesn't exists": "Wochenplan-Aktion, Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
 			"schedule action, script row {$row} - file \"{$file}\" is missing": "Wochenplan-Aktion, Zeile {$row} - Datei \"{$file}\" fehlt",
 			"schedule action, script row {$row} - script with ID {$id} doesn't exists": "Wochenplan-Aktion, Zeile {$row} - Skript mit ID {$id} existiert nicht",
+			"schedule action - script with ID {$id} doesn't exists": "Wochenplan-Aktion - Skript mit ID {$id} existiert nicht",
 
 			"file \"{$file}\" is missing": "Datei \"{$file}\" fehlt",
 			"file \"{$file}\" is unused": "Datei \"{$file}\" ist ungenutzt",
@@ -85,6 +87,7 @@
 			"flow plan step {$step}, script row {$row} - a object with ID {$id} doesn't exists": "Ablaufplan Schritt {$step}, Skript Zeile {$row} - ein Objekt mit ID {$id} existiert nicht",
 			"flow plan step {$step}, script row {$row} - file \"{$file}\" is missing": "Ablaufplan Schritt {$step}, Skript Zeile {$row} - Datei \"{$file}\" fehlt",
 			"flow plan step {$step}, script row {$row} - script with ID {$id} doesn't exists": "Ablaufplan Schritt {$step}, Skript Zeile {$row} - Skript mit ID {$id} existiert nicht",
+			"flow plan step {$step} - script with ID {$id} doesn't exists": "Ablaufplan Schritt {$step}, Skript mit ID {$id} existiert nicht",
 			"flow plan step {$step} - target {$varID} doesn't exists": "Ablaufplan Schritt {$step} - Ziel {$varID} existiert nicht",
 			"flow plan step {$step} - variable {$varID} doesn't exists": "Ablaufplan Schritt {$step} - Variable {$varID} existiert nicht",
 

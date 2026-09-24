@@ -663,28 +663,36 @@ class IntegrityCheck extends IPSModule
         if (isset($actionParameters['SCRIPT'])) {
             $file = 'Action #' . $eventID;
             $text = $actionParameters['SCRIPT'];
-            // $this->SendDebug(__FUNCTION__, 'script=' . $text, 0);
-            $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
-            foreach ($ret as $r) {
-                $row = $r['row'];
-                $id = $r['id'];
-                if ($id != false) {
-                    $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+            // $this->SendDebug(__FUNCTION__, 'script text=' . $text, 0);
+            if (is_numeric($text)) {
+                $id = (int) $text;
+                if ($id == 58262 || $this->IsValidID($id) && IPS_ObjectExists($id) == false) {
+                    $s = $this->TranslateFormat($eventTypeName . ' - script with ID {$id} doesn\'t exists', ['{$id}' => $id]);
                     $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                 }
-            }
-            $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $eventTypeName, $fileListINC, $fileListIPS);
-            foreach ($ret as $r) {
-                $row = $r['row'];
-                if (isset($r['file'])) {
-                    $file = $r['file'];
-                    $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
-                    $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
-                } else {
+            } else {
+                $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+                foreach ($ret as $r) {
+                    $row = $r['row'];
                     $id = $r['id'];
                     if ($id != false) {
-                        $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - script with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                        $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - a object with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
                         $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                    }
+                }
+                $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $eventTypeName, $fileListINC, $fileListIPS);
+                foreach ($ret as $r) {
+                    $row = $r['row'];
+                    if (isset($r['file'])) {
+                        $file = $r['file'];
+                        $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - file "{$file}" is missing', ['{$row}' => $row, '{$file}' => $file]);
+                        $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                    } else {
+                        $id = $r['id'];
+                        if ($id != false) {
+                            $s = $this->TranslateFormat($eventTypeName . ', script row {$row} - script with ID {$id} doesn\'t exists', ['{$row}' => $row, '{$id}' => $id]);
+                            $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
+                        }
                     }
                 }
             }
@@ -750,27 +758,36 @@ class IntegrityCheck extends IPSModule
         if (isset($action['parameters']['SCRIPT'])) {
             $file = 'Action #' . $scriptID . '_' . $step;
             $text = $action['parameters']['SCRIPT'];
-            $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
-            foreach ($ret as $r) {
-                $row = $r['row'];
-                $id = $r['id'];
-                if ($id != false) {
-                    $s = $this->TranslateFormat('flow plan step {$step}, script row {$row} - a object with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+            // $this->SendDebug(__FUNCTION__, 'script text=' . $text, 0);
+            if (is_numeric($text)) {
+                $id = (int) $text;
+                if ($this->IsValidID($id) && IPS_ObjectExists($id) == false) {
+                    $s = $this->TranslateFormat('flow plan step {$step} - script with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$id}' => $id]);
                     $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
                 }
-            }
-            $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $scriptTypeName, $fileListINC, $fileListIPS);
-            foreach ($ret as $r) {
-                $row = $r['row'];
-                if (isset($r['file'])) {
-                    $file = $r['file'];
-                    $s = $this->TranslateFormat('flow plan step {$step}, script row {$row} - file "{$file}" is missing', ['{$step}' => $step, '{$row}' => $row, '{$file}' => $file]);
-                    $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
-                } else {
+            } else {
+                $ret = $this->parseText4ObjectIDs($file, $text, $objectList, $ignoreNums);
+                foreach ($ret as $r) {
+                    $row = $r['row'];
                     $id = $r['id'];
                     if ($id != false) {
-                        $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - script with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+                        $s = $this->TranslateFormat('flow plan step {$step}, script row {$row} - a object with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
                         $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                    }
+                }
+                $ret = $this->parseText4Includes($file, $text, $objectList, $ignoreNums, $scriptTypeName, $fileListINC, $fileListIPS);
+                foreach ($ret as $r) {
+                    $row = $r['row'];
+                    if (isset($r['file'])) {
+                        $file = $r['file'];
+                        $s = $this->TranslateFormat('flow plan step {$step}, script row {$row} - file "{$file}" is missing', ['{$step}' => $step, '{$row}' => $row, '{$file}' => $file]);
+                        $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                    } else {
+                        $id = $r['id'];
+                        if ($id != false) {
+                            $s = $this->TranslateFormat('flow-plan step {$step}, script row {$row} - script with ID {$id} doesn\'t exists', ['{$step}' => $step, '{$row}' => $row, '{$id}' => $id]);
+                            $this->AddMessageEntry($messageList, 'scripts', $scriptID, $s, self::$LEVEL_ERROR);
+                        }
                     }
                 }
             }
