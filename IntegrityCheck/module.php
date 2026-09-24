@@ -666,7 +666,7 @@ class IntegrityCheck extends IPSModule
             // $this->SendDebug(__FUNCTION__, 'script text=' . $text, 0);
             if (is_numeric($text)) {
                 $id = (int) $text;
-                if ($id == 58262 || $this->IsValidID($id) && IPS_ObjectExists($id) == false) {
+                if ($this->IsValidID($id) && IPS_ObjectExists($id) == false) {
                     $s = $this->TranslateFormat($eventTypeName . ' - script with ID {$id} doesn\'t exists', ['{$id}' => $id]);
                     $this->AddMessageEntry($messageList, 'events', $eventID, $s, self::$LEVEL_ERROR);
                 }

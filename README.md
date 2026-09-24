@@ -135,7 +135,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.27 @ 24.09.2026 14:44
+- 1.27 @ 24.09.2026 16:40
   - Fix: IPS 9 - Ereignis-Aktionen können nun auch den Verweis von eine Script-ID enthalten anstelle des Scriptes selber
 
 - 1.26 @ 09.05.2026 11:36
